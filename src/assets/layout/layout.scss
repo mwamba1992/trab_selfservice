@@ -1,0 +1,170 @@
+@use './variables/brand';
+
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Poppins', -apple-system, sans-serif;
+}
+
+.layout-content {
+  margin-top: 4.1rem;
+  padding: 1.75rem 2rem;
+  min-height: calc(100vh - 4.1rem - 3rem);
+  background: #F8FAF9;
+}
+
+.layout-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--trab-border);
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--trab-muted);
+  background: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+
+// Page header
+.page-header {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--trab-primary);
+    margin: 0 0 0.25rem;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  p {
+    font-size: 0.82rem;
+    color: var(--trab-muted);
+    margin: 0;
+  }
+}
+
+// Card component
+.ss-card {
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+// Stat bar
+.stat-bar {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.85rem 1.25rem;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: #64748B;
+
+    strong {
+      color: #1E293B;
+      font-weight: 700;
+    }
+  }
+
+  .stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+// DataTable refinements
+.p-datatable {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  border: 1px solid #f1f5f9 !important;
+
+  .p-datatable-thead > tr > th {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #475569 !important;
+    background: #F8FAFB !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 0.8rem 1rem !important;
+    white-space: nowrap !important;
+  }
+
+  .p-datatable-thead > tr {
+    border-left: 3px solid var(--trab-primary) !important;
+  }
+
+  .p-datatable-tbody > tr > td {
+    font-size: 0.82rem !important;
+    padding: 0.7rem 1rem !important;
+    border-bottom: 1px solid #f8f9fa !important;
+    color: #1E293B !important;
+  }
+
+  .p-datatable-tbody > tr {
+    border-left: 3px solid transparent !important;
+    transition: border-color 0.15s, background 0.15s !important;
+  }
+
+  .p-datatable-tbody > tr:hover {
+    border-left-color: var(--trab-primary) !important;
+    > td { background: rgba(27,107,61,0.02) !important; }
+  }
+
+  .p-paginator {
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+// Tag refinements
+.p-tag {
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  padding: 0.2rem 0.55rem !important;
+  border-radius: 12px !important;
+}
+
+// Dialog refinements
+.p-dialog {
+  .p-dialog-header {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 1rem 1.5rem !important;
+  }
+  .p-dialog-title {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: #1E293B !important;
+    font-family: 'Poppins', sans-serif !important;
+  }
+  .p-dialog-footer {
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+}
+
+// Buttons
+.trab-btn {
+  background: var(--trab-primary) !important;
+  border-color: var(--trab-primary) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  font-family: 'Poppins', sans-serif !important;
+}
+.trab-btn:hover {
+  background: var(--trab-primary-hover) !important;
+  border-color: var(--trab-primary-hover) !important;
+}

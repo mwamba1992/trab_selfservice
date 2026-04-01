@@ -82,9 +82,50 @@ const unlinkAppellant = async (appellant) => {
   } catch { toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to remove', life: 3000 }); }
 };
 
+// TIN verification
+const tinVerified = ref(false);
+const tinVerifying = ref(false);
+const tinMessage = ref('');
+
+const verifyTin = async () => {
+  const tin = newForm.value.tinNumber;
+  if (!tin || tin.replace(/[-\s]/g, '').length < 3) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Enter a valid TIN number', life: 3000 });
+    return;
+  }
+  tinVerifying.value = true;
+  tinMessage.value = '';
+  try {
+    const res = await SelfServiceAppellants.lookupTin(tin);
+    if (!res.status || !res.data) {
+      tinMessage.value = res.description || 'TIN not found';
+      toast.add({ severity: 'error', summary: 'Verification Failed', detail: tinMessage.value, life: 4000 });
+      return;
+    }
+    const d = res.data;
+    newForm.value.firstName = d.CompanyName;
+    newForm.value.phone = d.Mobile || '';
+    newForm.value.email = d.Email || '';
+    newForm.value.vatNumber = d.Vrn || '';
+    newForm.value.natureOfBusiness = d.BusinessType || '';
+    newForm.value.address = [d.Region, d.District].filter(Boolean).join(', ') + (d.PostalAddress ? ', P.O. Box ' + d.PostalAddress : '');
+    tinVerified.value = true;
+    tinMessage.value = d.CompanyName;
+    toast.add({ severity: 'success', summary: 'TIN Verified', detail: d.CompanyName, life: 4000 });
+  } catch {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'TIN verification failed', life: 3000 });
+  } finally {
+    tinVerifying.value = false;
+  }
+};
+
+const onTinChange = () => { tinVerified.value = false; tinMessage.value = ''; };
+
 // Register new
 const openRegister = () => {
   newForm.value = { firstName: '', lastName: '', phone: '', email: '', tinNumber: tinSearch.value || '', vatNumber: '', natureOfBusiness: '', address: '' };
+  tinVerified.value = false;
+  tinMessage.value = '';
   registerVisible.value = true;
 };
 
@@ -177,20 +218,29 @@ const toggleMenu = (event, item) => { menuItem.value = item; menuRef.value.toggl
     <!-- Register New Dialog -->
     <Dialog v-model:visible="registerVisible" header="Register New Appellant" modal :style="{width:'520px'}">
       <div class="flex flex-col gap-3 mt-2">
+        <!-- TIN + Verify -->
+        <div>
+          <label class="field-label">TIN Number *</label>
+          <div class="flex gap-2">
+            <InputText v-model="newForm.tinNumber" class="flex-1" placeholder="XXX-XXX-XXX" @input="onTinChange" :disabled="tinVerified" />
+            <Button v-if="!tinVerified" label="Verify" icon="pi pi-search" class="trab-btn" size="small" :loading="tinVerifying" @click="verifyTin" />
+            <Button v-else label="Change" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="onTinChange(); newForm.tinNumber=''" />
+          </div>
+          <small v-if="tinMessage && !tinVerified" class="text-orange-500">{{ tinMessage }}</small>
+          <small v-if="tinVerified" style="color:#059669"><i class="pi pi-check-circle"></i> Verified: {{ tinMessage }}</small>
+        </div>
+
+        <!-- Auto-filled fields -->
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">Name / Company *</label><InputText v-model="newForm.firstName" class="w-full" /></div>
-          <div><label class="field-label">Last Name</label><InputText v-model="newForm.lastName" class="w-full" /></div>
+          <div><label class="field-label">Name / Company *</label><InputText v-model="newForm.firstName" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
+          <div><label class="field-label">VAT Number</label><InputText v-model="newForm.vatNumber" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">TIN Number *</label><InputText v-model="newForm.tinNumber" class="w-full" /></div>
-          <div><label class="field-label">VAT Number</label><InputText v-model="newForm.vatNumber" class="w-full" /></div>
+          <div><label class="field-label">Phone</label><InputText v-model="newForm.phone" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
+          <div><label class="field-label">Email</label><InputText v-model="newForm.email" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">Phone</label><InputText v-model="newForm.phone" class="w-full" /></div>
-          <div><label class="field-label">Email</label><InputText v-model="newForm.email" class="w-full" /></div>
-        </div>
-        <div><label class="field-label">Nature of Business</label><InputText v-model="newForm.natureOfBusiness" class="w-full" /></div>
-        <div><label class="field-label">Address</label><InputText v-model="newForm.address" class="w-full" /></div>
+        <div><label class="field-label">Nature of Business</label><InputText v-model="newForm.natureOfBusiness" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
+        <div><label class="field-label">Address</label><InputText v-model="newForm.address" class="w-full" :disabled="tinVerified" :class="{'verified-field':tinVerified}" /></div>
       </div>
       <template #footer>
         <Button label="Cancel" text @click="registerVisible = false" />
@@ -202,6 +252,7 @@ const toggleMenu = (event, item) => { menuItem.value = item; menuRef.value.toggl
 
 <style scoped>
 .field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; font-family: 'Poppins', sans-serif; }
+.verified-field { background:#f0fdf4 !important; border-color:#86efac !important; }
 .search-result {
   display: flex;
   align-items: center;

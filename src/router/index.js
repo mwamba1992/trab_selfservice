@@ -13,6 +13,7 @@ const routes = [
       { path: 'notices', name: 'MyNotices', component: () => import('@/views/MyNotices.vue') },
       { path: 'notices/new', name: 'FileNotice', component: () => import('@/views/FileNotice.vue') },
       { path: 'appeals', name: 'MyAppeals', component: () => import('@/views/MyAppeals.vue') },
+      { path: 'appeals/file', name: 'FileAppeal', component: () => import('@/views/FileAppeal.vue') },
       { path: 'bills', name: 'MyBills', component: () => import('@/views/MyBills.vue') },
     ],
   },

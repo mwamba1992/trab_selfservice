@@ -16,6 +16,7 @@
     "postcss": "^8.5.8",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
+    "qrcode": "^1.5.4",
     "sass": "^1.98.0",
     "sweetalert2": "^11.26.24",
     "tailwindcss": "^4.2.2",

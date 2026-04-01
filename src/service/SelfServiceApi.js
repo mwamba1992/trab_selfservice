@@ -12,6 +12,10 @@ export const SelfServiceAppellants = {
     const res = await api.get('/self-service/appellants');
     return res.data.data;
   },
+  async lookupTin(tin) {
+    const res = await api.get(`/self-service/tin-lookup/${tin}`);
+    return res.data;
+  },
   async searchByTin(tin) {
     const res = await api.get('/self-service/appellants/search', { params: { tin } });
     return res.data.data;
@@ -52,6 +56,28 @@ export const SelfServiceAppeals = {
   },
   async getById(id) {
     const res = await api.get(`/self-service/appeals/${id}`);
+    return res.data.data;
+  },
+  async create(data) {
+    const res = await api.post('/self-service/appeals', data);
+    return res.data.data;
+  },
+  async getParties(appealId) {
+    const res = await api.get(`/self-service/appeals/${appealId}/parties`);
+    return res.data.data;
+  },
+  async getDocuments(appealId) {
+    const res = await api.get(`/self-service/appeals/${appealId}/documents`);
+    return res.data.data;
+  },
+  async uploadDocument(appealId, file, documentType, remarks) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentType', documentType || 'OTHER');
+    if (remarks) formData.append('remarks', remarks);
+    const res = await api.post(`/self-service/appeals/${appealId}/documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data.data;
   },
 };

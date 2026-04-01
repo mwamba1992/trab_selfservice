@@ -97,9 +97,19 @@ const isValid = (notice) => {
         <Column header="Validity">
           <template #body="{data}"><Tag :value="isValid(data)?'Valid':'Expired'" :severity="isValid(data)?'success':'danger'" /></template>
         </Column>
-        <Column header="Actions" style="width:5rem">
+        <Column header="Actions" style="width:8rem">
           <template #body="{data}">
-            <Button icon="pi pi-eye" text rounded size="small" @click="openView(data)" v-tooltip.top="'View Details'" />
+            <div class="flex gap-1 items-center">
+              <Button icon="pi pi-eye" text rounded size="small" @click="openView(data)" v-tooltip.top="'View Notice Details'" />
+              <Button v-if="data.paymentStatus !== 'PAID'"
+                icon="pi pi-wallet" text rounded size="small" severity="warn"
+                @click="$router.push('/bills')"
+                v-tooltip.top="'Go to Bills page to make payment for this notice'" />
+              <Button v-if="data.paymentStatus === 'PAID' && isValid(data) && data.noticeNo"
+                icon="pi pi-file-edit" text rounded size="small" severity="success"
+                @click="$router.push(`/appeals/file?noticeNo=${data.noticeNo}`)"
+                v-tooltip.top="'File a Statement of Appeal for this notice'" />
+            </div>
           </template>
         </Column>
         <template #empty>

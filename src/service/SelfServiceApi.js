@@ -1,94 +1,161 @@
 import api from './Api.js';
 
+const data = (res) => res.data.data;
+const page = (url) => async (page = 1, size = 10, search = '') => data(await api.get(url, { params: { page, size, search } }));
+
+function documentsApi(base) {
+  return {
+    async getDocuments(id) {
+      return data(await api.get(`${base}/${id}/documents`));
+    },
+    async uploadDocument(id, file, documentType, remarks) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', documentType || 'OTHER');
+      if (remarks) formData.append('remarks', remarks);
+      return data(await api.post(`${base}/${id}/documents`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+      }));
+    },
+  };
+}
+
 export const SelfServiceDashboard = {
   async getStats() {
-    const res = await api.get('/self-service/dashboard');
-    return res.data.data;
+    return data(await api.get('/self-service/dashboard'));
+  },
+};
+
+// Per-resource stat aggregates (server-side, correct under lazy pagination).
+export const SelfServiceStats = {
+  async get() {
+    return data(await api.get('/self-service/stats'));
+  },
+};
+
+export const SelfServiceProfile = {
+  async get() {
+    return data(await api.get('/self-service/profile'));
+  },
+  async update(payload) {
+    return data(await api.put('/self-service/profile', payload));
+  },
+  async updateCompany(payload) {
+    return data(await api.put('/company/profile', payload));
+  },
+};
+
+export const SelfServiceNotifications = {
+  async getAll(page = 1, size = 10, unread = false) {
+    return data(await api.get('/self-service/notifications', { params: { page, size, unread } }));
+  },
+  async unreadCount() {
+    return data(await api.get('/self-service/notifications/unread-count')).count;
+  },
+  async markRead(id) {
+    return data(await api.put(`/self-service/notifications/${id}/read`));
+  },
+  async markAllRead() {
+    return data(await api.put('/self-service/notifications/read-all'));
   },
 };
 
 export const SelfServiceAppellants = {
   async getAll() {
-    const res = await api.get('/self-service/appellants');
-    return res.data.data;
+    return data(await api.get('/self-service/appellants'));
   },
   async lookupTin(tin) {
-    const res = await api.get(`/self-service/tin-lookup/${tin}`);
+    const res = await api.get(`/self-service/tin-lookup/${encodeURIComponent(tin)}`);
     return res.data;
   },
   async searchByTin(tin) {
-    const res = await api.get('/self-service/appellants/search', { params: { tin } });
-    return res.data.data;
+    return data(await api.get('/self-service/appellants/search', { params: { tin } }));
   },
-  async create(data) {
-    const res = await api.post('/self-service/appellants', data);
-    return res.data.data;
+  async create(payload) {
+    return data(await api.post('/self-service/appellants', payload));
   },
   async link(appellantId) {
-    const res = await api.post(`/self-service/appellants/${appellantId}/link`);
-    return res.data.data;
+    return data(await api.post(`/self-service/appellants/${appellantId}/link`));
   },
   async unlink(appellantId) {
-    const res = await api.delete(`/self-service/appellants/${appellantId}/link`);
-    return res.data.data;
+    return data(await api.delete(`/self-service/appellants/${appellantId}/link`));
   },
 };
 
 export const SelfServiceNotices = {
-  async getAll(page = 1, size = 10) {
-    const res = await api.get('/self-service/notices', { params: { page, size } });
-    return res.data.data;
-  },
+  getAll: page('/self-service/notices'),
   async getById(id) {
-    const res = await api.get(`/self-service/notices/${id}`);
-    return res.data.data;
+    return data(await api.get(`/self-service/notices/${id}`));
   },
-  async create(data) {
-    const res = await api.post('/self-service/notices', data);
-    return res.data.data;
+  async create(payload) {
+    return data(await api.post('/self-service/notices', payload));
   },
+  ...documentsApi('/self-service/notices'),
 };
 
 export const SelfServiceAppeals = {
-  async getAll(page = 1, size = 10) {
-    const res = await api.get('/self-service/appeals', { params: { page, size } });
-    return res.data.data;
-  },
+  getAll: page('/self-service/appeals'),
   async getById(id) {
-    const res = await api.get(`/self-service/appeals/${id}`);
-    return res.data.data;
+    return data(await api.get(`/self-service/appeals/${id}`));
   },
-  async create(data) {
-    const res = await api.post('/self-service/appeals', data);
-    return res.data.data;
+  async create(payload) {
+    return data(await api.post('/self-service/appeals', payload));
   },
   async getParties(appealId) {
-    const res = await api.get(`/self-service/appeals/${appealId}/parties`);
-    return res.data.data;
+    return data(await api.get(`/self-service/appeals/${appealId}/parties`));
   },
-  async getDocuments(appealId) {
-    const res = await api.get(`/self-service/appeals/${appealId}/documents`);
-    return res.data.data;
+  ...documentsApi('/self-service/appeals'),
+};
+
+export const SelfServiceApplications = {
+  getAll: page('/self-service/applications'),
+  async getById(id) {
+    return data(await api.get(`/self-service/applications/${id}`));
   },
-  async uploadDocument(appealId, file, documentType, remarks) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('documentType', documentType || 'OTHER');
-    if (remarks) formData.append('remarks', remarks);
-    const res = await api.post(`/self-service/appeals/${appealId}/documents`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return res.data.data;
+  async create(payload) {
+    return data(await api.post('/self-service/applications', payload));
+  },
+  ...documentsApi('/self-service/applications'),
+};
+
+export const SelfServiceDocuments = {
+  /** Ownership-checked download; resolves to a Blob. */
+  async download(documentId) {
+    const res = await api.get(`/self-service/documents/${documentId}/download`, { responseType: 'blob', timeout: 120000 });
+    return res.data;
   },
 };
 
 export const SelfServiceBills = {
-  async getAll(page = 1, size = 10) {
-    const res = await api.get('/self-service/bills', { params: { page, size } });
-    return res.data.data;
-  },
+  getAll: page('/self-service/bills'),
   async getById(id) {
-    const res = await api.get(`/self-service/bills/${id}`);
-    return res.data.data;
+    return data(await api.get(`/self-service/bills/${id}`));
+  },
+  async getStatus(id) {
+    return data(await api.get(`/self-service/bills/${id}/status`));
+  },
+};
+
+export const SelfServiceSummons = {
+  getAll: page('/self-service/summons'),
+};
+
+export const SelfServiceDecisions = {
+  getAll: page('/self-service/decisions'),
+};
+
+export const SelfServiceCompany = {
+  async getStaff() {
+    return data(await api.get('/company/staff'));
+  },
+  async addStaff(payload) {
+    return data(await api.post('/company/staff', payload));
+  },
+  async deactivateStaff(id) {
+    return data(await api.delete(`/company/staff/${id}`));
+  },
+  async reactivateStaff(id) {
+    return data(await api.put(`/company/staff/${id}/reactivate`));
   },
 };

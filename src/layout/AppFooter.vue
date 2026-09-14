@@ -1,9 +1,23 @@
+<script setup>
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+const year = new Date().getFullYear();
+</script>
+
 <template>
-  <div class="layout-footer">
-    <span>&copy; {{ new Date().getFullYear() }} Tax Revenue Appeals Board. All rights reserved.</span>
-    <span style="color:#e2e8f0">|</span>
-    <a href="#" style="color:var(--trab-muted);text-decoration:none;font-size:0.78rem">Help Center</a>
-    <span style="color:#e2e8f0">|</span>
-    <a href="#" style="color:var(--trab-muted);text-decoration:none;font-size:0.78rem">Privacy Policy</a>
-  </div>
+  <footer class="layout-footer">
+    <span>{{ t('footer.rights', { year }) }}</span>
+    <span class="sep" aria-hidden="true">|</span>
+    <a href="#">{{ t('footer.help') }}</a>
+    <span class="sep" aria-hidden="true">|</span>
+    <a href="#">{{ t('footer.privacy') }}</a>
+  </footer>
 </template>
+
+<style scoped>
+.layout-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem 0.6rem; }
+.sep { color: #e2e8f0; }
+a { color: var(--trab-muted); text-decoration: none; font-size: 0.78rem; }
+a:hover { color: var(--trab-primary); }
+</style>

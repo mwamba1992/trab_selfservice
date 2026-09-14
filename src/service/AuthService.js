@@ -1,54 +1,48 @@
 import api from './Api.js';
+import { session } from './session.js';
+import { clearDrafts } from '@/composables/useDraft.js';
+import { profileStore } from '@/stores/profile.js';
+
+const data = (res) => res.data.data;
 
 export default {
   async requestOtp(phone) {
-    const res = await api.post('/auth/otp/request', { phone });
-    return res.data.data;
+    return data(await api.post('/auth/otp/request', { phone }));
   },
 
   async verifyOtp(phone, otp) {
-    const res = await api.post('/auth/otp/verify', { phone, otp });
-    const { accessToken, refreshToken, user } = res.data.data;
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('userId', user.id);
-    localStorage.setItem('userName', `${user.firstName} ${user.lastName}`);
-    localStorage.setItem('userPhone', user.phone);
-    return user;
+    const result = data(await api.post('/auth/otp/verify', { phone, otp }));
+    session.start(result);
+    return result.user;
   },
 
+  async lookupTin(tin) {
+    const res = await api.get(`/auth/tin-lookup/${encodeURIComponent(tin)}`);
+    return res.data;
+  },
+
+  async registerCompany(payload) {
+    return data(await api.post('/auth/company/register', payload));
+  },
+
+  async verifyCompany(payload) {
+    const result = data(await api.post('/auth/company/verify', payload));
+    session.start(result);
+    return result;
+  },
+
+  /** Explicit sign-out also discards unfinished drafts on this device. */
   logout() {
-    localStorage.clear();
-    window.location.href = '/login';
+    clearDrafts();
+    session.clear();
+    profileStore.reset();
   },
 
   isAuthenticated() {
-    const token = localStorage.getItem('access_token');
-    if (!token) return false;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      // expired if exp (seconds) is in the past
-      if (payload.exp * 1000 < Date.now()) {
-        localStorage.clear();
-        return false;
-      }
-      return true;
-    } catch {
-      localStorage.clear();
-      return false;
-    }
+    return session.isActive();
   },
 
   getUserName() {
-    return localStorage.getItem('userName') || '';
-  },
-
-  getUserPhone() {
-    return localStorage.getItem('userPhone') || '';
-  },
-
-  async getProfile() {
-    const res = await api.get('/auth/me');
-    return res.data.data;
+    return session.getUserName();
   },
 };

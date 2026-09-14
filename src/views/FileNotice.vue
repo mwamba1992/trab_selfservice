@@ -84,18 +84,31 @@ const dateErrors = computed(() => {
   const errors = {};
   if (serviceDays.value !== null && serviceDays.value < 0) errors.service = t('validation.serviceDateFuture');
   else if (serviceDays.value !== null && serviceDays.value > 30) errors.service = t('validation.noticeLate', { days: serviceDays.value });
-  if (form.value.dateOfTaxationDecision && form.value.dateOfServiceDecision && form.value.dateOfTaxationDecision > form.value.dateOfServiceDecision) {
+  if (
+    form.value.dateOfTaxationDecision &&
+    form.value.dateOfServiceDecision &&
+    form.value.dateOfTaxationDecision > form.value.dateOfServiceDecision
+  ) {
     errors.decision = t('validation.decisionAfterService');
   }
   return errors;
 });
-const taxationStepValid = computed(() =>
-  !!form.value.dateOfTaxationDecision && !!form.value.dateOfServiceDecision && !Object.keys(dateErrors.value).length,
+const taxationStepValid = computed(
+  () => !!form.value.dateOfTaxationDecision && !!form.value.dateOfServiceDecision && !Object.keys(dateErrors.value).length,
 );
 
 // ─── Quick register ───
 const quickRegister = ref(false);
-const emptyAppellant = () => ({ firstName: '', lastName: '', phone: '', email: '', tinNumber: '', vatNumber: '', natureOfBusiness: '', address: '' });
+const emptyAppellant = () => ({
+  firstName: '',
+  lastName: '',
+  phone: '',
+  email: '',
+  tinNumber: '',
+  vatNumber: '',
+  natureOfBusiness: '',
+  address: '',
+});
 const newAppellant = ref(emptyAppellant());
 const registerErrors = ref({});
 const registering = ref(false);
@@ -183,28 +196,47 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
         <StepPanels>
           <StepPanel v-slot="{ activateCallback }" value="1">
             <div class="py-4">
-              <p class="text-sm mb-3" style="color:#64748B">{{ t('fileNotice.selectFor') }}</p>
+              <p class="text-sm mb-3 text-muted">{{ t('fileNotice.selectFor') }}</p>
               <div class="flex items-end gap-3 mb-4 flex-wrap">
                 <div class="flex-1 min-w-[14rem]">
                   <label class="field-label" for="n-appellant">{{ t('fileNotice.searchAppellant') }} *</label>
                   <AutoComplete
-                    v-model="selectedAppellant" input-id="n-appellant" :suggestions="filteredAppellants" option-label="displayName"
-                    :placeholder="t('fileNotice.typeToSearch')" class="w-full" input-class="w-full" dropdown
-                    @complete="searchAppellant" @item-select="onAppellantSelect"
+                    v-model="selectedAppellant"
+                    input-id="n-appellant"
+                    :suggestions="filteredAppellants"
+                    option-label="displayName"
+                    :placeholder="t('fileNotice.typeToSearch')"
+                    class="w-full"
+                    input-class="w-full"
+                    dropdown
+                    @complete="searchAppellant"
+                    @item-select="onAppellantSelect"
                   />
                 </div>
-                <Button :label="t('appellants.registerNew')" icon="pi pi-plus" outlined size="small" style="white-space:nowrap" @click="openQuickRegister" />
+                <Button
+                  :label="t('appellants.registerNew')"
+                  icon="pi pi-plus"
+                  outlined
+                  size="small"
+                  class="whitespace-nowrap"
+                  @click="openQuickRegister"
+                />
               </div>
 
               <div v-if="selectedAppellant?.id" class="selected-preview">
                 <div class="flex items-center gap-2 mb-2">
                   <div class="preview-avatar"><i class="pi pi-building"></i></div>
                   <div>
-                    <p class="font-semibold text-sm" style="color:#1E293B">{{ selectedAppellant.firstName }} {{ selectedAppellant.lastName || '' }}</p>
-                    <p class="text-xs" style="color:#64748B">{{ t('fields.tin') }}: {{ selectedAppellant.tinNumber || t('common.dash') }} | {{ t('fields.phone') }}: {{ selectedAppellant.phone || t('common.dash') }}</p>
+                    <p class="font-semibold text-sm text-heading">
+                      {{ selectedAppellant.firstName }} {{ selectedAppellant.lastName || '' }}
+                    </p>
+                    <p class="text-xs text-muted">
+                      {{ t('fields.tin') }}: {{ selectedAppellant.tinNumber || t('common.dash') }} | {{ t('fields.phone') }}:
+                      {{ selectedAppellant.phone || t('common.dash') }}
+                    </p>
                   </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" style="color:#64748B">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted">
                   <div>{{ t('fields.email') }}: {{ selectedAppellant.email || t('common.dash') }}</div>
                   <div>{{ t('fields.business') }}: {{ selectedAppellant.natureOfBusiness || t('common.dash') }}</div>
                   <div class="sm:col-span-2">{{ t('fields.address') }}: {{ selectedAppellant.address || t('common.dash') }}</div>
@@ -213,11 +245,28 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
 
               <div class="mb-3">
                 <label class="field-label" for="n-region">{{ t('fields.region') }}</label>
-                <Select v-model="form.regionId" input-id="n-region" :options="regions" option-label="name" option-value="id" :placeholder="t('fileNotice.selectRegion')" class="w-full" filter show-clear />
+                <Select
+                  v-model="form.regionId"
+                  input-id="n-region"
+                  :options="regions"
+                  option-label="name"
+                  option-value="id"
+                  :placeholder="t('fileNotice.selectRegion')"
+                  class="w-full"
+                  filter
+                  show-clear
+                />
               </div>
             </div>
             <div class="flex justify-end pt-2">
-              <Button :label="t('common.next')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" :disabled="!form.appellantId" @click="activateCallback('2')" />
+              <Button
+                :label="t('common.next')"
+                icon="pi pi-arrow-right"
+                icon-pos="right"
+                class="trab-btn"
+                :disabled="!form.appellantId"
+                @click="activateCallback('2')"
+              />
             </div>
           </StepPanel>
 
@@ -225,12 +274,26 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <div>
                 <label class="field-label" for="n-decision">{{ t('fileNotice.decisionDate') }} *</label>
-                <InputText id="n-decision" v-model="form.dateOfTaxationDecision" type="date" class="w-full" :max="today()" :invalid="!!dateErrors.decision" />
+                <InputText
+                  id="n-decision"
+                  v-model="form.dateOfTaxationDecision"
+                  type="date"
+                  class="w-full"
+                  :max="today()"
+                  :invalid="!!dateErrors.decision"
+                />
                 <small v-if="dateErrors.decision" class="field-error">{{ dateErrors.decision }}</small>
               </div>
               <div>
                 <label class="field-label" for="n-service">{{ t('fileNotice.serviceDate') }} *</label>
-                <InputText id="n-service" v-model="form.dateOfServiceDecision" type="date" class="w-full" :max="today()" :invalid="!!dateErrors.service" />
+                <InputText
+                  id="n-service"
+                  v-model="form.dateOfServiceDecision"
+                  type="date"
+                  class="w-full"
+                  :max="today()"
+                  :invalid="!!dateErrors.service"
+                />
                 <small v-if="dateErrors.service" class="field-error">{{ dateErrors.service }}</small>
               </div>
               <div>
@@ -239,32 +302,82 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
               </div>
               <div>
                 <label class="field-label" for="n-against">{{ t('fileNotice.appealAgainst') }}</label>
-                <Select v-model="form.description" input-id="n-against" :options="appealAgainstOptions" option-label="label" option-value="value" :placeholder="t('fileNotice.select')" class="w-full" />
+                <Select
+                  v-model="form.description"
+                  input-id="n-against"
+                  :options="appealAgainstOptions"
+                  option-label="label"
+                  option-value="value"
+                  :placeholder="t('fileNotice.select')"
+                  class="w-full"
+                />
               </div>
               <div class="md:col-span-2">
                 <label class="field-label" for="n-respondent">{{ t('fileNotice.additionalRespondent') }}</label>
-                <InputText id="n-respondent" v-model="form.additionalRespondent" class="w-full" :placeholder="t('fileNotice.additionalRespondentHint')" maxlength="200" />
+                <InputText
+                  id="n-respondent"
+                  v-model="form.additionalRespondent"
+                  class="w-full"
+                  :placeholder="t('fileNotice.additionalRespondentHint')"
+                  maxlength="200"
+                />
               </div>
             </div>
             <div class="flex justify-between pt-2">
               <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('1')" />
-              <Button :label="t('common.review')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" :disabled="!taxationStepValid" @click="activateCallback('3')" />
+              <Button
+                :label="t('common.review')"
+                icon="pi pi-arrow-right"
+                icon-pos="right"
+                class="trab-btn"
+                :disabled="!taxationStepValid"
+                @click="activateCallback('3')"
+              />
             </div>
           </StepPanel>
 
           <StepPanel v-slot="{ activateCallback }" value="3">
             <div class="py-4">
-              <h3 class="font-semibold mb-3" style="color:#1E293B">{{ t('fileNotice.reviewTitle') }}</h3>
-              <div class="review-grid">
-                <div class="view-row"><span class="view-label">{{ t('fields.appellant') }}</span><span class="view-value">{{ selectedAppellant?.firstName }} {{ selectedAppellant?.lastName || '' }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fields.tin') }}</span><span class="view-value">{{ selectedAppellant?.tinNumber || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fields.phone') }}</span><span class="view-value">{{ selectedAppellant?.phone || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fields.region') }}</span><span class="view-value">{{ regionName || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileNotice.decisionDate') }}</span><span class="view-value">{{ form.dateOfTaxationDecision }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileNotice.serviceDate') }}</span><span class="view-value">{{ form.dateOfServiceDecision }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileNotice.lodgingDate') }}</span><span class="view-value">{{ form.loggedAt }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileNotice.appealAgainst') }}</span><span class="view-value">{{ appealAgainstLabel || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileNotice.respondent') }}</span><span class="view-value">{{ t('fileNotice.defaultRespondent') }}{{ form.additionalRespondent ? `, ${form.additionalRespondent}` : '' }}</span></div>
+              <h3 class="font-semibold mb-3 text-heading">{{ t('fileNotice.reviewTitle') }}</h3>
+              <div class="view-grid">
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.appellant') }}</span
+                  ><span class="view-value">{{ selectedAppellant?.firstName }} {{ selectedAppellant?.lastName || '' }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.tin') }}</span
+                  ><span class="view-value">{{ selectedAppellant?.tinNumber || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.phone') }}</span
+                  ><span class="view-value">{{ selectedAppellant?.phone || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.region') }}</span
+                  ><span class="view-value">{{ regionName || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileNotice.decisionDate') }}</span
+                  ><span class="view-value">{{ form.dateOfTaxationDecision }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileNotice.serviceDate') }}</span
+                  ><span class="view-value">{{ form.dateOfServiceDecision }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileNotice.lodgingDate') }}</span
+                  ><span class="view-value">{{ form.loggedAt }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileNotice.appealAgainst') }}</span
+                  ><span class="view-value">{{ appealAgainstLabel || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileNotice.respondent') }}</span
+                  ><span class="view-value"
+                    >{{ t('fileNotice.defaultRespondent') }}{{ form.additionalRespondent ? `, ${form.additionalRespondent}` : '' }}</span
+                  >
+                </div>
               </div>
             </div>
             <div class="flex justify-between pt-2">
@@ -276,7 +389,13 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
       </Stepper>
     </div>
 
-    <Dialog v-model:visible="quickRegister" :header="t('appellants.registerTitle')" modal :style="{ width: '520px' }" :breakpoints="{ '640px': '95vw' }">
+    <Dialog
+      v-model:visible="quickRegister"
+      :header="t('appellants.registerTitle')"
+      modal
+      :style="{ width: '520px' }"
+      :breakpoints="{ '640px': '95vw' }"
+    >
       <form class="flex flex-col gap-3 mt-2" novalidate @submit.prevent="registerAndSelect">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -290,7 +409,14 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
           </div>
           <div>
             <label class="field-label" for="q-tin">{{ t('fields.tinNumber') }}</label>
-            <InputText id="q-tin" v-model="newAppellant.tinNumber" class="w-full" placeholder="XXX-XXX-XXX" inputmode="numeric" :invalid="!!registerErrors.tinNumber" />
+            <InputText
+              id="q-tin"
+              v-model="newAppellant.tinNumber"
+              class="w-full"
+              placeholder="XXX-XXX-XXX"
+              inputmode="numeric"
+              :invalid="!!registerErrors.tinNumber"
+            />
             <small v-if="registerErrors.tinNumber" class="field-error">{{ registerErrors.tinNumber }}</small>
           </div>
           <div>
@@ -322,13 +448,22 @@ const appealAgainstLabel = computed(() => appealAgainstOptions.value.find((o) =>
 </template>
 
 <style scoped>
-.field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
-.field-error { display: block; color: #dc2626; font-size: 0.74rem; margin-top: 0.2rem; }
-.selected-preview { background: #f8faf9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
-.preview-avatar { width: 2.25rem; height: 2.25rem; border-radius: 8px; background: rgba(27,107,61,0.08); color: #1B6B3D; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-.review-grid { display: flex; flex-direction: column; }
-.view-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid #f8f9fa; font-size: 0.84rem; }
-.view-row:last-child { border-bottom: none; }
-.view-label { color: #64748B; }
-.view-value { color: #1E293B; font-weight: 500; text-align: right; }
+.selected-preview {
+  background: #f8faf9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.preview-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  background: rgba(27, 107, 61, 0.08);
+  color: #1b6b3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
 </style>

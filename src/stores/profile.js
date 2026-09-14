@@ -45,7 +45,9 @@ export const profileStore = {
   async refreshUnread() {
     try {
       state.unreadCount = await SelfServiceNotifications.unreadCount();
-    } catch { /* badge is best-effort */ }
+    } catch {
+      /* badge is best-effort */
+    }
   },
 
   setUnread(count) {

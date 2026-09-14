@@ -119,19 +119,29 @@ const reactivate = async (s) => {
     <div v-if="company" class="ss-card mb-3">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h3 class="text-base font-bold" style="color:#1E293B">{{ company.name }}</h3>
-          <p class="text-xs" style="color:#64748B">{{ t('fields.tin') }}: {{ company.tinNumber }}<template v-if="company.businessType"> | {{ company.businessType }}</template></p>
+          <h3 class="text-base font-bold text-heading">{{ company.name }}</h3>
+          <p class="text-xs text-muted">
+            {{ t('fields.tin') }}: {{ company.tinNumber }}<template v-if="company.businessType"> | {{ company.businessType }}</template>
+          </p>
         </div>
         <Tag :value="t('staff.count', { active: activeCount, max: maxStaff })" :severity="activeCount < maxStaff ? 'info' : 'warn'" />
       </div>
     </div>
 
-    <div v-if="!isAdmin && !loading" class="info-note mb-3"><i class="pi pi-info-circle"></i> {{ t('staff.adminOnly') }}</div>
+    <div v-if="!isAdmin && !loading" class="note note-info"><i class="pi pi-info-circle"></i> {{ t('staff.adminOnly') }}</div>
 
     <div class="ss-card mb-3">
       <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
-        <span class="text-sm font-semibold" style="color:#475569">{{ t('staff.companyStaff') }}</span>
-        <Button v-if="isAdmin" :label="t('staff.addStaff')" icon="pi pi-user-plus" size="small" class="trab-btn" :disabled="!canAdd" @click="openAdd" />
+        <span class="text-sm font-semibold text-label">{{ t('staff.companyStaff') }}</span>
+        <Button
+          v-if="isAdmin"
+          :label="t('staff.addStaff')"
+          icon="pi pi-user-plus"
+          size="small"
+          class="trab-btn"
+          :disabled="!canAdd"
+          @click="openAdd"
+        />
       </div>
 
       <div v-if="failed" class="state-box" role="alert">
@@ -140,28 +150,69 @@ const reactivate = async (s) => {
       </div>
 
       <DataTable v-else :value="staff" :loading="loading" data-key="id">
-        <Column :header="t('common.sn')" style="width:3rem"><template #body="{ index }">{{ index + 1 }}</template></Column>
-        <Column :header="t('fields.name')"><template #body="{ data }">{{ displayName(data) || t('common.dash') }}</template></Column>
-        <Column :header="t('fields.phone')"><template #body="{ data }">{{ data.user?.phone || t('common.dash') }}</template></Column>
+        <Column :header="t('common.sn')" class="w-12"
+          ><template #body="{ index }">{{ index + 1 }}</template></Column
+        >
+        <Column :header="t('fields.name')"
+          ><template #body="{ data }">{{ displayName(data) || t('common.dash') }}</template></Column
+        >
+        <Column :header="t('fields.phone')"
+          ><template #body="{ data }">{{ data.user?.phone || t('common.dash') }}</template></Column
+        >
         <Column :header="t('fields.role')">
-          <template #body="{ data }"><Tag :value="statusLabel(data.role)" :severity="data.role === 'ADMIN' ? 'success' : 'info'" /></template>
+          <template #body="{ data }"
+            ><Tag :value="statusLabel(data.role)" :severity="data.role === 'ADMIN' ? 'success' : 'info'"
+          /></template>
         </Column>
         <Column :header="t('common.status')">
-          <template #body="{ data }"><Tag :value="statusLabel(data.isActive ? 'ACTIVE' : 'INACTIVE')" :severity="data.isActive ? 'success' : 'danger'" /></template>
+          <template #body="{ data }"
+            ><Tag :value="statusLabel(data.isActive ? 'ACTIVE' : 'INACTIVE')" :severity="data.isActive ? 'success' : 'danger'"
+          /></template>
         </Column>
-        <Column v-if="isAdmin" :header="t('common.actions')" style="width:7rem">
+        <Column v-if="isAdmin" :header="t('common.actions')" class="w-28">
           <template #body="{ data }">
-            <Button v-if="data.isActive && data.role !== 'ADMIN'" icon="pi pi-ban" text rounded size="small" severity="danger" :aria-label="t('staff.deactivate')" v-tooltip.top="t('staff.deactivate')" @click="deactivate(data)" />
-            <Button v-if="!data.isActive" icon="pi pi-refresh" text rounded size="small" severity="success" :aria-label="t('staff.reactivate')" v-tooltip.top="t('staff.reactivate')" @click="reactivate(data)" />
+            <Button
+              v-if="data.isActive && data.role !== 'ADMIN'"
+              v-tooltip.top="t('staff.deactivate')"
+              icon="pi pi-ban"
+              text
+              rounded
+              size="small"
+              severity="danger"
+              :aria-label="t('staff.deactivate')"
+              @click="deactivate(data)"
+            />
+            <Button
+              v-if="!data.isActive"
+              v-tooltip.top="t('staff.reactivate')"
+              icon="pi pi-refresh"
+              text
+              rounded
+              size="small"
+              severity="success"
+              :aria-label="t('staff.reactivate')"
+              @click="reactivate(data)"
+            />
           </template>
         </Column>
-        <template #empty><div class="text-center py-4" style="color:#94a3b8">{{ t('staff.empty') }}</div></template>
+        <template #empty
+          ><div class="empty-state">
+            <i class="pi pi-users"></i>
+            <p>{{ t('staff.empty') }}</p>
+          </div></template
+        >
       </DataTable>
     </div>
 
-    <Dialog v-model:visible="dialogVisible" :header="t('staff.addTitle')" modal :style="{ width: '420px' }" :breakpoints="{ '640px': '95vw' }">
+    <Dialog
+      v-model:visible="dialogVisible"
+      :header="t('staff.addTitle')"
+      modal
+      :style="{ width: '420px' }"
+      :breakpoints="{ '640px': '95vw' }"
+    >
       <form novalidate @submit.prevent="addStaff">
-        <p class="hint mb-3">{{ t('staff.addHint') }}</p>
+        <p class="field-hint mb-3">{{ t('staff.addHint') }}</p>
         <div class="mb-3">
           <label class="field-label" for="s-name">{{ t('auth.fullName') }} *</label>
           <InputText id="s-name" v-model="newName" class="w-full" :placeholder="t('staff.namePlaceholder')" :invalid="!!formErrors.name" />
@@ -169,7 +220,15 @@ const reactivate = async (s) => {
         </div>
         <div class="mb-1">
           <label class="field-label" for="s-phone">{{ t('auth.phoneLabel') }} *</label>
-          <InputText id="s-phone" v-model="newPhone" class="w-full" placeholder="0712345678" inputmode="tel" maxlength="13" :invalid="!!formErrors.phone" />
+          <InputText
+            id="s-phone"
+            v-model="newPhone"
+            class="w-full"
+            placeholder="0712345678"
+            inputmode="tel"
+            maxlength="13"
+            :invalid="!!formErrors.phone"
+          />
           <small v-if="formErrors.phone" class="field-error">{{ formErrors.phone }}</small>
         </div>
       </form>
@@ -180,11 +239,3 @@ const reactivate = async (s) => {
     </Dialog>
   </div>
 </template>
-
-<style scoped>
-.field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
-.field-error { display: block; color: #dc2626; font-size: 0.74rem; margin-top: 0.2rem; }
-.hint { font-size: 0.76rem; color: #94a3b8; line-height: 1.4; }
-.info-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.82rem; }
-.state-box { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; padding: 2rem 1rem; color: #94a3b8; font-size: 0.86rem; }
-</style>

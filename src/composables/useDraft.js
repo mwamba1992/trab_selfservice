@@ -10,8 +10,12 @@ const keyFor = (name) => `${PREFIX}${session.getUserId() || 'anonymous'}:${name}
 export function clearDrafts(userId = session.getUserId()) {
   try {
     const prefix = `${PREFIX}${userId || 'anonymous'}:`;
-    Object.keys(localStorage).filter((k) => k.startsWith(prefix)).forEach((k) => localStorage.removeItem(k));
-  } catch { /* storage unavailable */ }
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(prefix))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {
+    /* storage unavailable */
+  }
 }
 
 /**
@@ -35,18 +39,28 @@ export function useDraft(name, sources, { debounceMs = 400 } = {}) {
     } else if (saved) {
       localStorage.removeItem(key);
     }
-  } catch { /* unreadable draft — start fresh */ }
+  } catch {
+    /* unreadable draft — start fresh */
+  }
 
   const persist = () => {
     if (cleared) return;
     const data = Object.fromEntries(Object.entries(sources).map(([field, source]) => [field, source.value]));
-    try { localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data })); } catch { /* not persisted */ }
+    try {
+      localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
+    } catch {
+      /* not persisted */
+    }
   };
 
-  const stop = watch(Object.values(sources), () => {
-    clearTimeout(timer);
-    timer = setTimeout(persist, debounceMs);
-  }, { deep: true });
+  const stop = watch(
+    Object.values(sources),
+    () => {
+      clearTimeout(timer);
+      timer = setTimeout(persist, debounceMs);
+    },
+    { deep: true },
+  );
 
   const flush = () => {
     clearTimeout(timer);
@@ -59,7 +73,11 @@ export function useDraft(name, sources, { debounceMs = 400 } = {}) {
     clearTimeout(timer);
     stop();
     restored.value = false;
-    try { localStorage.removeItem(key); } catch { /* nothing to remove */ }
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      /* nothing to remove */
+    }
   };
 
   onBeforeUnmount(flush);

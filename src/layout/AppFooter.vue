@@ -16,8 +16,21 @@ const year = new Date().getFullYear();
 </template>
 
 <style scoped>
-.layout-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.35rem 0.6rem; }
-.sep { color: #e2e8f0; }
-a { color: var(--trab-muted); text-decoration: none; font-size: 0.78rem; }
-a:hover { color: var(--trab-primary); }
+.layout-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.6rem;
+}
+.sep {
+  color: #e2e8f0;
+}
+a {
+  color: var(--trab-muted);
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+a:hover {
+  color: var(--trab-primary);
+}
 </style>

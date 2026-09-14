@@ -188,25 +188,48 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
             <div class="py-4">
               <div v-if="form.noticeNo" class="mb-4">
                 <label class="field-label" for="a-notice">{{ t('fileAppeal.noticeNumber') }}</label>
-                <InputText id="a-notice" v-model="form.noticeNo" class="w-full" disabled style="background:#f0fdf4" />
+                <InputText id="a-notice" v-model="form.noticeNo" class="w-full verified-field" disabled />
               </div>
 
               <div class="mb-4">
                 <label class="section-label"><i class="pi pi-users"></i> {{ t('fileAppeal.appellantList') }} *</label>
                 <p class="help-text">{{ t('fileAppeal.appellantHelp') }}</p>
                 <div class="flex gap-2 mb-2">
-                  <Select v-model="selectedAppellantToAdd" :options="appellants" option-label="displayName" :placeholder="t('fileAppeal.selectAppellant')" class="flex-1 min-w-0" filter />
-                  <Button :label="t('common.add')" icon="pi pi-plus" class="trab-btn" :disabled="!selectedAppellantToAdd" @click="addAppellantToList" />
+                  <Select
+                    v-model="selectedAppellantToAdd"
+                    :options="appellants"
+                    option-label="displayName"
+                    :placeholder="t('fileAppeal.selectAppellant')"
+                    class="flex-1 min-w-0"
+                    filter
+                  />
+                  <Button
+                    :label="t('common.add')"
+                    icon="pi pi-plus"
+                    class="trab-btn"
+                    :disabled="!selectedAppellantToAdd"
+                    @click="addAppellantToList"
+                  />
                 </div>
                 <div v-for="(a, i) in appellantList" :key="a.id" class="party-row">
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="party-num">{{ i + 1 }}</span>
                     <div class="min-w-0">
                       <span class="party-name">{{ fullName(a) }}</span>
-                      <span class="party-detail">{{ t('fields.tin') }}: {{ a.tinNumber || t('common.dash') }} | {{ a.phone || t('common.dash') }}</span>
+                      <span class="party-detail"
+                        >{{ t('fields.tin') }}: {{ a.tinNumber || t('common.dash') }} | {{ a.phone || t('common.dash') }}</span
+                      >
                     </div>
                   </div>
-                  <Button icon="pi pi-trash" text rounded size="small" severity="danger" :aria-label="t('common.cancel')" @click="removeAppellantFromList(a)" />
+                  <Button
+                    icon="pi pi-trash"
+                    text
+                    rounded
+                    size="small"
+                    severity="danger"
+                    :aria-label="t('common.cancel')"
+                    @click="removeAppellantFromList(a)"
+                  />
                 </div>
                 <div v-if="!appellantList.length" class="empty-list">{{ t('fileAppeal.noAppellants') }}</div>
               </div>
@@ -222,20 +245,48 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
                   <Tag :value="t('status.DEFAULT')" severity="success" />
                 </div>
                 <div v-if="nonDefaultRespondents.length" class="flex gap-2 mt-2 mb-2">
-                  <Select v-model="selectedRespondent" :options="nonDefaultRespondents" option-label="name" :placeholder="t('fileAppeal.selectRespondent')" class="flex-1 min-w-0" filter />
-                  <Button :label="t('common.add')" icon="pi pi-plus" class="trab-btn" :disabled="!selectedRespondent" @click="addRespondent" />
+                  <Select
+                    v-model="selectedRespondent"
+                    :options="nonDefaultRespondents"
+                    option-label="name"
+                    :placeholder="t('fileAppeal.selectRespondent')"
+                    class="flex-1 min-w-0"
+                    filter
+                  />
+                  <Button
+                    :label="t('common.add')"
+                    icon="pi pi-plus"
+                    class="trab-btn"
+                    :disabled="!selectedRespondent"
+                    @click="addRespondent"
+                  />
                 </div>
                 <div v-for="(r, i) in additionalRespondents" :key="r.id" class="party-row">
                   <div class="flex items-center gap-2">
                     <span class="party-num">{{ i + 2 }}</span>
                     <span class="party-name">{{ r.name }}</span>
                   </div>
-                  <Button icon="pi pi-trash" text rounded size="small" severity="danger" :aria-label="t('common.cancel')" @click="removeRespondent(r)" />
+                  <Button
+                    icon="pi pi-trash"
+                    text
+                    rounded
+                    size="small"
+                    severity="danger"
+                    :aria-label="t('common.cancel')"
+                    @click="removeRespondent(r)"
+                  />
                 </div>
               </div>
             </div>
             <div class="flex justify-end pt-2">
-              <Button :label="t('common.next')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" :disabled="!appellantList.length" @click="activateCallback('2')" />
+              <Button
+                :label="t('common.next')"
+                icon="pi pi-arrow-right"
+                icon-pos="right"
+                class="trab-btn"
+                :disabled="!appellantList.length"
+                @click="activateCallback('2')"
+              />
             </div>
           </StepPanel>
 
@@ -244,64 +295,159 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
               <div>
                 <label class="field-label" for="a-tax">{{ t('fileAppeal.taxCategory') }} *</label>
-                <Select v-model="form.taxTypeId" input-id="a-tax" :options="taxTypes" option-label="name" option-value="id" :placeholder="t('fileNotice.select')" class="w-full" filter />
+                <Select
+                  v-model="form.taxTypeId"
+                  input-id="a-tax"
+                  :options="taxTypes"
+                  option-label="name"
+                  option-value="id"
+                  :placeholder="t('fileNotice.select')"
+                  class="w-full"
+                  filter
+                />
               </div>
-              <div><label class="field-label" for="a-nature">{{ t('fileAppeal.natureOfAppeal') }}</label><InputText id="a-nature" v-model="form.natureOfAppeal" class="w-full" /></div>
-              <div><label class="field-label" for="a-assessment">{{ t('fileAppeal.assessmentNo') }}</label><InputText id="a-assessment" v-model="form.assessmentNo" class="w-full" /></div>
-              <div><label class="field-label" for="a-bank">{{ t('fileAppeal.bankNo') }}</label><InputText id="a-bank" v-model="form.bankNo" class="w-full" /></div>
-              <div><label class="field-label" for="a-entry">{{ t('fileAppeal.billEntryNo') }}</label><InputText id="a-entry" v-model="form.billEntryNo" class="w-full" /></div>
-              <div><label class="field-label" for="a-office">{{ t('fileAppeal.taxedOffice') }}</label><InputText id="a-office" v-model="form.taxedOffice" class="w-full" /></div>
+              <div>
+                <label class="field-label" for="a-nature">{{ t('fileAppeal.natureOfAppeal') }}</label
+                ><InputText id="a-nature" v-model="form.natureOfAppeal" class="w-full" />
+              </div>
+              <div>
+                <label class="field-label" for="a-assessment">{{ t('fileAppeal.assessmentNo') }}</label
+                ><InputText id="a-assessment" v-model="form.assessmentNo" class="w-full" />
+              </div>
+              <div>
+                <label class="field-label" for="a-bank">{{ t('fileAppeal.bankNo') }}</label
+                ><InputText id="a-bank" v-model="form.bankNo" class="w-full" />
+              </div>
+              <div>
+                <label class="field-label" for="a-entry">{{ t('fileAppeal.billEntryNo') }}</label
+                ><InputText id="a-entry" v-model="form.billEntryNo" class="w-full" />
+              </div>
+              <div>
+                <label class="field-label" for="a-office">{{ t('fileAppeal.taxedOffice') }}</label
+                ><InputText id="a-office" v-model="form.taxedOffice" class="w-full" />
+              </div>
             </div>
             <div class="flex justify-between pt-2">
               <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('1')" />
-              <Button :label="t('common.next')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" :disabled="!form.taxTypeId" @click="activateCallback('3')" />
+              <Button
+                :label="t('common.next')"
+                icon="pi pi-arrow-right"
+                icon-pos="right"
+                class="trab-btn"
+                :disabled="!form.taxTypeId"
+                @click="activateCallback('3')"
+              />
             </div>
           </StepPanel>
 
           <StepPanel v-slot="{ activateCallback }" value="3">
             <div class="py-4">
-              <h4 class="text-sm font-semibold mb-1" style="color:#475569">{{ t('fileAppeal.amountsTitle') }}</h4>
+              <h4 class="text-sm font-semibold mb-1 text-label">{{ t('fileAppeal.amountsTitle') }}</h4>
               <p class="help-text mb-3">{{ t('fileAppeal.amountsHelp') }}</p>
               <div class="flex gap-2 mb-3 flex-wrap">
                 <Select v-model="newAmount.currency" :options="currencyOptions" class="w-28" :aria-label="t('fields.amount')" />
-                <InputNumber v-model="newAmount.amount" :placeholder="t('fields.amount')" class="flex-1 min-w-[10rem]" :min-fraction-digits="2" :min="0" />
+                <InputNumber
+                  v-model="newAmount.amount"
+                  :placeholder="t('fields.amount')"
+                  class="flex-1 min-w-[10rem]"
+                  :min-fraction-digits="2"
+                  :min="0"
+                />
                 <Button :label="t('common.add')" icon="pi pi-plus" size="small" outlined :disabled="!newAmount.amount" @click="addAmount" />
               </div>
               <div v-for="(a, i) in amounts" :key="`amount-${i}`" class="party-row">
                 <span>{{ a.currency }} {{ formatMoney(a.amount, locale) }}</span>
-                <Button icon="pi pi-times" text rounded size="small" severity="danger" :aria-label="t('common.cancel')" @click="removeAmount(i)" />
+                <Button
+                  icon="pi pi-times"
+                  text
+                  rounded
+                  size="small"
+                  severity="danger"
+                  :aria-label="t('common.cancel')"
+                  @click="removeAmount(i)"
+                />
               </div>
 
-              <h4 class="text-sm font-semibold mt-4 mb-1" style="color:#475569">{{ t('fileAppeal.witnesses') }}</h4>
+              <h4 class="text-sm font-semibold mt-4 mb-1 text-label">{{ t('fileAppeal.witnesses') }}</h4>
               <p class="help-text mb-3">{{ t('fileAppeal.witnessesHelp') }}</p>
               <form class="flex gap-2 mb-1 flex-wrap" novalidate @submit.prevent="addWitness">
-                <InputText v-model="newWitness.name" :placeholder="t('fileAppeal.witnessName')" class="flex-1 min-w-[10rem]" :aria-label="t('fileAppeal.witnessName')" />
-                <InputText v-model="newWitness.phone" :placeholder="t('fields.phone')" class="w-40" inputmode="tel" :aria-label="t('fields.phone')" />
+                <InputText
+                  v-model="newWitness.name"
+                  :placeholder="t('fileAppeal.witnessName')"
+                  class="flex-1 min-w-[10rem]"
+                  :aria-label="t('fileAppeal.witnessName')"
+                />
+                <InputText
+                  v-model="newWitness.phone"
+                  :placeholder="t('fields.phone')"
+                  class="w-40"
+                  inputmode="tel"
+                  :aria-label="t('fields.phone')"
+                />
                 <Button type="submit" :label="t('common.add')" icon="pi pi-plus" size="small" outlined />
               </form>
               <small v-if="witnessError" class="field-error mb-2">{{ witnessError }}</small>
               <div v-for="(w, i) in witnesses" :key="`witness-${i}`" class="party-row">
-                <span>{{ w.name }} <small style="color:#64748B">{{ w.phone }}</small></span>
-                <Button icon="pi pi-times" text rounded size="small" severity="danger" :aria-label="t('common.cancel')" @click="removeWitness(i)" />
+                <span
+                  >{{ w.name }} <small class="text-muted">{{ w.phone }}</small></span
+                >
+                <Button
+                  icon="pi pi-times"
+                  text
+                  rounded
+                  size="small"
+                  severity="danger"
+                  :aria-label="t('common.cancel')"
+                  @click="removeWitness(i)"
+                />
               </div>
             </div>
             <div class="flex justify-between pt-2">
               <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('2')" />
-              <Button :label="t('common.review')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" @click="activateCallback('4')" />
+              <Button
+                :label="t('common.review')"
+                icon="pi pi-arrow-right"
+                icon-pos="right"
+                class="trab-btn"
+                @click="activateCallback('4')"
+              />
             </div>
           </StepPanel>
 
           <StepPanel v-slot="{ activateCallback }" value="4">
             <div class="py-4">
-              <h3 class="font-semibold mb-3" style="color:#1E293B">{{ t('fileAppeal.reviewTitle') }}</h3>
-              <div class="review-grid">
-                <div class="view-row"><span class="view-label">{{ t('fields.noticeNo') }}</span><span class="view-value">{{ form.noticeNo || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fields.appellants') }}</span><span class="view-value">{{ appellantList.map(fullName).join(', ') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fields.respondents') }}</span><span class="view-value">{{ [t('fileAppeal.defaultRespondent'), ...additionalRespondents.map((r) => r.name)].join(', ') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileAppeal.taxCategory') }}</span><span class="view-value">{{ taxTypeName || t('common.dash') }}</span></div>
-                <div class="view-row"><span class="view-label">{{ t('fileAppeal.natureOfAppeal') }}</span><span class="view-value">{{ form.natureOfAppeal || t('common.dash') }}</span></div>
-                <div v-if="amounts.length" class="view-row"><span class="view-label">{{ t('fileAppeal.amounts') }}</span><span class="view-value">{{ amounts.map((a) => `${a.currency} ${formatMoney(a.amount, locale)}`).join(', ') }}</span></div>
-                <div v-if="witnesses.length" class="view-row"><span class="view-label">{{ t('fileAppeal.witnesses') }}</span><span class="view-value">{{ witnesses.map((w) => w.name).join(', ') }}</span></div>
+              <h3 class="font-semibold mb-3 text-heading">{{ t('fileAppeal.reviewTitle') }}</h3>
+              <div class="view-grid">
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.noticeNo') }}</span
+                  ><span class="view-value">{{ form.noticeNo || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.appellants') }}</span
+                  ><span class="view-value">{{ appellantList.map(fullName).join(', ') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fields.respondents') }}</span
+                  ><span class="view-value">{{
+                    [t('fileAppeal.defaultRespondent'), ...additionalRespondents.map((r) => r.name)].join(', ')
+                  }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileAppeal.taxCategory') }}</span
+                  ><span class="view-value">{{ taxTypeName || t('common.dash') }}</span>
+                </div>
+                <div class="view-row">
+                  <span class="view-label">{{ t('fileAppeal.natureOfAppeal') }}</span
+                  ><span class="view-value">{{ form.natureOfAppeal || t('common.dash') }}</span>
+                </div>
+                <div v-if="amounts.length" class="view-row">
+                  <span class="view-label">{{ t('fileAppeal.amounts') }}</span
+                  ><span class="view-value">{{ amounts.map((a) => `${a.currency} ${formatMoney(a.amount, locale)}`).join(', ') }}</span>
+                </div>
+                <div v-if="witnesses.length" class="view-row">
+                  <span class="view-label">{{ t('fileAppeal.witnesses') }}</span
+                  ><span class="view-value">{{ witnesses.map((w) => w.name).join(', ') }}</span>
+                </div>
               </div>
             </div>
             <div class="flex justify-between pt-2">
@@ -316,19 +462,69 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
 </template>
 
 <style scoped>
-.field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.2rem; }
-.field-error { display: block; color: #dc2626; font-size: 0.74rem; }
-.section-label { display: block; font-size: 0.85rem; font-weight: 700; color: #1E293B; margin-bottom: 0.3rem; }
-.section-label i { margin-right: 0.4rem; color: #1B6B3D; }
-.help-text { font-size: 0.76rem; color: #94a3b8; margin-bottom: 0.5rem; line-height: 1.4; }
-.party-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.6rem 0.75rem; font-size: 0.82rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.4rem; background: #fff; }
-.default-row { background: #f0fdf4; border-color: #86efac; }
-.party-num { width: 24px; height: 24px; background: #1B6B3D; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
-.party-name { font-weight: 600; color: #1E293B; display: block; font-size: 0.82rem; }
-.party-detail { color: #64748B; font-size: 0.72rem; display: block; }
-.empty-list { text-align: center; padding: 1rem; color: #94a3b8; font-size: 0.8rem; border: 1px dashed #e2e8f0; border-radius: 8px; }
-.review-grid { display: flex; flex-direction: column; }
-.view-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid #f8f9fa; font-size: 0.84rem; }
-.view-label { color: #64748B; }
-.view-value { color: #1E293B; font-weight: 500; text-align: right; }
+.section-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.3rem;
+}
+.section-label i {
+  margin-right: 0.4rem;
+  color: #1b6b3d;
+}
+.help-text {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+.party-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.82rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+  background: #fff;
+}
+.default-row {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.party-num {
+  width: 24px;
+  height: 24px;
+  background: #1b6b3d;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.party-name {
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  font-size: 0.82rem;
+}
+.party-detail {
+  color: #64748b;
+  font-size: 0.72rem;
+  display: block;
+}
+.empty-list {
+  text-align: center;
+  padding: 1rem;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  border: 1px dashed #e2e8f0;
+  border-radius: 8px;
+}
 </style>

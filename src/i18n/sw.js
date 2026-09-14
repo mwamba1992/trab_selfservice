@@ -172,7 +172,8 @@ export default {
   landing: {
     heroTitle: 'Wasilisha Rufani Yako ya Kodi',
     heroHighlight: 'Mtandaoni, Wakati Wowote',
-    heroDesc: 'Wasilisha taarifa za kusudio la kukata rufani, hati za rufani, fuatilia mashauri yako na ulipe ada — yote katika mfumo mmoja salama.',
+    heroDesc:
+      'Wasilisha taarifa za kusudio la kukata rufani, hati za rufani, fuatilia mashauri yako na ulipe ada — yote katika mfumo mmoja salama.',
     startFiling: 'Anza Kuwasilisha',
     existingUser: 'Ingia (Mtumiaji Aliyepo)',
     secure: 'Salama na Imesimbwa',
@@ -183,7 +184,10 @@ export default {
     getStarted: 'Anza sasa',
     services: {
       notice: { title: 'Wasilisha Taarifa ya Kusudio la Rufani', text: 'Wasilisha taarifa yako dhidi ya uamuzi wa kodi ndani ya siku 30' },
-      statement: { title: 'Wasilisha Hati ya Rufani', text: 'Wasilisha hati ya rufani pamoja na maelezo ya mgogoro wa kodi, mashahidi na ushahidi' },
+      statement: {
+        title: 'Wasilisha Hati ya Rufani',
+        text: 'Wasilisha hati ya rufani pamoja na maelezo ya mgogoro wa kodi, mashahidi na ushahidi',
+      },
       track: { title: 'Fuatilia Mashauri Yangu', text: 'Fuatilia rufani, usikilizwaji na maamuzi yako hatua kwa hatua' },
       bills: { title: 'Bili na Malipo', text: 'Angalia bili zako, namba za malipo na stakabadhi' },
     },
@@ -495,15 +499,18 @@ export default {
     types: {
       NOTICE_FILED: {
         title: 'Taarifa ya kusudio la rufani imewasilishwa',
-        message: 'Taarifa yako ya kusudio la rufani kwa {appellantName} imepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya taarifa.',
+        message:
+          'Taarifa yako ya kusudio la rufani kwa {appellantName} imepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya taarifa.',
       },
       APPEAL_FILED: {
         title: 'Hati ya rufani imewasilishwa',
-        message: 'Hati yako ya rufani kwa {appellantName} imepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya rufani.',
+        message:
+          'Hati yako ya rufani kwa {appellantName} imepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya rufani.',
       },
       APPLICATION_FILED: {
         title: 'Maombi yamewasilishwa',
-        message: 'Maombi yako kwa {appellantName} yamepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya maombi.',
+        message:
+          'Maombi yako kwa {appellantName} yamepokelewa. Lipa namba ya malipo {controlNumber} (TZS {amount}) ili upate namba ya maombi.',
       },
       PAYMENT_RECEIVED: {
         title: 'Malipo yamepokelewa',

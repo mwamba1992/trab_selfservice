@@ -28,7 +28,16 @@ const searching = ref(false);
 
 // Register new
 const registerVisible = ref(false);
-const emptyForm = () => ({ firstName: '', lastName: '', phone: '', email: '', tinNumber: '', vatNumber: '', natureOfBusiness: '', address: '' });
+const emptyForm = () => ({
+  firstName: '',
+  lastName: '',
+  phone: '',
+  email: '',
+  tinNumber: '',
+  vatNumber: '',
+  natureOfBusiness: '',
+  address: '',
+});
 const newForm = ref(emptyForm());
 const formErrors = ref({});
 const saving = ref(false);
@@ -77,12 +86,22 @@ const searchByTin = async () => {
 const linkAppellant = async (appellant) => {
   try {
     await SelfServiceAppellants.link(appellant.id);
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('appellants.added', { name: fullName(appellant) }), life: 3000 });
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: t('appellants.added', { name: fullName(appellant) }),
+      life: 3000,
+    });
     searchResults.value = [];
     tinSearch.value = '';
     await loadData();
   } catch (err) {
-    toast.add({ severity: 'warn', summary: t('common.validation'), detail: apiErrorMessage(err, t('appellants.alreadyListed')), life: 3000 });
+    toast.add({
+      severity: 'warn',
+      summary: t('common.validation'),
+      detail: apiErrorMessage(err, t('appellants.alreadyListed')),
+      life: 3000,
+    });
   }
 };
 
@@ -99,7 +118,12 @@ const unlinkAppellant = (appellant) => {
         toast.add({ severity: 'success', summary: t('common.success'), detail: t('appellants.removed'), life: 3000 });
         await loadData();
       } catch (err) {
-        toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('appellants.removeFailed')), life: 4000 });
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: apiErrorMessage(err, t('appellants.removeFailed')),
+          life: 4000,
+        });
       }
     },
   });
@@ -198,20 +222,26 @@ const saveNew = async () => {
     </div>
 
     <div class="ss-card mb-3">
-      <h4 class="text-sm font-semibold mb-2" style="color:#475569">{{ t('appellants.addByTin') }}</h4>
+      <h4 class="text-sm font-semibold mb-2 text-label">{{ t('appellants.addByTin') }}</h4>
       <form class="flex items-center gap-3 flex-wrap" @submit.prevent="searchByTin">
-        <InputText v-model="tinSearch" :placeholder="t('appellants.tinPlaceholder')" :aria-label="t('fields.tinNumber')" class="search-input" inputmode="numeric" />
+        <InputText
+          v-model="tinSearch"
+          :placeholder="t('appellants.tinPlaceholder')"
+          :aria-label="t('fields.tinNumber')"
+          class="search-input"
+          inputmode="numeric"
+        />
         <Button type="submit" :label="t('common.search')" icon="pi pi-search" class="trab-btn" size="small" :loading="searching" />
         <Button type="button" :label="t('appellants.registerNew')" icon="pi pi-plus" outlined size="small" @click="openRegister" />
       </form>
 
       <div v-if="searchResults.length" class="mt-3">
-        <p class="text-xs font-semibold mb-2" style="color:#64748B">{{ t('appellants.found', { count: searchResults.length }) }}</p>
+        <p class="text-xs font-semibold mb-2 text-muted">{{ t('appellants.found', { count: searchResults.length }) }}</p>
         <div v-for="r in searchResults" :key="r.id" class="search-result">
           <div class="flex-1 min-w-0">
-            <span class="text-sm font-semibold" style="color:#1E293B">{{ fullName(r) }}</span>
-            <span class="text-xs ml-2" style="color:#64748B">{{ t('fields.tin') }}: {{ r.tinNumber }}</span>
-            <span class="text-xs ml-2" style="color:#94a3b8">{{ r.phone || '' }}</span>
+            <span class="text-sm font-semibold text-heading">{{ fullName(r) }}</span>
+            <span class="text-xs ml-2 text-muted">{{ t('fields.tin') }}: {{ r.tinNumber }}</span>
+            <span class="text-xs ml-2 text-subtle">{{ r.phone || '' }}</span>
           </div>
           <Button :label="t('appellants.addToClients')" icon="pi pi-plus" size="small" class="trab-btn" @click="linkAppellant(r)" />
         </div>
@@ -219,11 +249,19 @@ const saveNew = async () => {
     </div>
 
     <div class="stat-bar">
-      <div class="stat-item"><div class="stat-dot" style="background:#1B6B3D"></div> {{ t('appellants.myClients') }}: <strong>{{ appellants.length }}</strong></div>
+      <div class="stat-item">
+        <div class="stat-dot" style="background: #1b6b3d"></div>
+        {{ t('appellants.myClients') }}: <strong>{{ appellants.length }}</strong>
+      </div>
     </div>
 
     <div class="ss-card mb-3">
-      <InputText v-model="filterText" :placeholder="t('appellants.filterPlaceholder')" :aria-label="t('common.search')" class="search-input" />
+      <InputText
+        v-model="filterText"
+        :placeholder="t('appellants.filterPlaceholder')"
+        :aria-label="t('common.search')"
+        class="search-input"
+      />
     </div>
 
     <div class="ss-card">
@@ -232,68 +270,160 @@ const saveNew = async () => {
         <Button :label="t('common.retry')" size="small" outlined @click="loadData" />
       </div>
       <DataTable v-else :value="filtered" :loading="loading" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" data-key="id">
-        <Column :header="t('common.sn')" style="width:3.5rem"><template #body="{ index }">{{ index + 1 }}</template></Column>
-        <Column :header="t('fields.name')" sortable sort-field="firstName"><template #body="{ data }">{{ fullName(data) }}</template></Column>
+        <Column :header="t('common.sn')" class="w-14"
+          ><template #body="{ index }">{{ index + 1 }}</template></Column
+        >
+        <Column :header="t('fields.name')" sortable sort-field="firstName"
+          ><template #body="{ data }">{{ fullName(data) }}</template></Column
+        >
         <Column field="tinNumber" :header="t('fields.tin')" sortable />
         <Column field="phone" :header="t('fields.phone')" />
         <Column field="email" :header="t('fields.email')" />
         <Column field="natureOfBusiness" :header="t('fields.business')" />
-        <Column :header="t('common.actions')" style="width:4rem">
+        <Column :header="t('common.actions')" class="w-16">
           <template #body="{ data }">
-            <Button icon="pi pi-user-minus" text rounded size="small" severity="danger" :aria-label="t('appellants.removeFromClients')" v-tooltip.top="t('appellants.removeFromClients')" @click="unlinkAppellant(data)" />
+            <Button
+              v-tooltip.top="t('appellants.removeFromClients')"
+              icon="pi pi-user-minus"
+              text
+              rounded
+              size="small"
+              severity="danger"
+              :aria-label="t('appellants.removeFromClients')"
+              @click="unlinkAppellant(data)"
+            />
           </template>
         </Column>
         <template #empty>
-          <div class="text-center py-8">
-            <i class="pi pi-users text-3xl" style="color:#cbd5e1"></i>
-            <p class="text-sm mt-2" style="color:#94a3b8">{{ t('appellants.empty') }}</p>
+          <div class="empty-state">
+            <i class="pi pi-users"></i>
+            <p>{{ t('appellants.empty') }}</p>
           </div>
         </template>
       </DataTable>
     </div>
 
-    <Dialog v-model:visible="registerVisible" :header="t('appellants.registerTitle')" modal :style="{ width: '540px' }" :breakpoints="{ '640px': '95vw' }">
+    <Dialog
+      v-model:visible="registerVisible"
+      :header="t('appellants.registerTitle')"
+      modal
+      :style="{ width: '540px' }"
+      :breakpoints="{ '640px': '95vw' }"
+    >
       <form class="flex flex-col gap-3 mt-2" novalidate @submit.prevent="saveNew">
         <div>
           <label class="field-label" for="a-tin">{{ t('fields.tinNumber') }} *</label>
           <div class="flex gap-2">
-            <InputText id="a-tin" v-model="newForm.tinNumber" class="flex-1" placeholder="XXX-XXX-XXX" inputmode="numeric" :disabled="tinVerified" :invalid="!!formErrors.tinNumber" @input="resetTin" />
-            <Button v-if="!tinVerified" type="button" :label="t('auth.verify')" icon="pi pi-search" class="trab-btn" size="small" :loading="tinVerifying" @click="verifyTin" />
-            <Button v-else type="button" :label="t('appellants.change')" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="resetTin(); newForm.tinNumber = ''" />
+            <InputText
+              id="a-tin"
+              v-model="newForm.tinNumber"
+              class="flex-1"
+              placeholder="XXX-XXX-XXX"
+              inputmode="numeric"
+              :disabled="tinVerified"
+              :invalid="!!formErrors.tinNumber"
+              @input="resetTin"
+            />
+            <Button
+              v-if="!tinVerified"
+              type="button"
+              :label="t('auth.verify')"
+              icon="pi pi-search"
+              class="trab-btn"
+              size="small"
+              :loading="tinVerifying"
+              @click="verifyTin"
+            />
+            <Button
+              v-else
+              type="button"
+              :label="t('appellants.change')"
+              icon="pi pi-refresh"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="
+                resetTin();
+                newForm.tinNumber = '';
+              "
+            />
           </div>
           <small v-if="formErrors.tinNumber" class="field-error">{{ formErrors.tinNumber }}</small>
           <small v-else-if="tinMessage && !tinVerified" class="text-orange-600">{{ tinMessage }}</small>
-          <small v-if="tinVerified" style="color:#059669"><i class="pi pi-check-circle"></i> {{ t('appellants.verified', { name: tinMessage }) }}</small>
+          <small v-if="tinVerified" class="field-hint text-success"
+            ><i class="pi pi-check-circle"></i> {{ t('appellants.verified', { name: tinMessage }) }}</small
+          >
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="field-label" for="a-name">{{ t('fields.companyName') }} *</label>
-            <InputText id="a-name" v-model="newForm.firstName" class="w-full" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" :invalid="!!formErrors.firstName" />
+            <InputText
+              id="a-name"
+              v-model="newForm.firstName"
+              class="w-full"
+              :disabled="tinVerified"
+              :class="{ 'verified-field': tinVerified }"
+              :invalid="!!formErrors.firstName"
+            />
             <small v-if="formErrors.firstName" class="field-error">{{ formErrors.firstName }}</small>
           </div>
           <div>
             <label class="field-label" for="a-vat">{{ t('fields.vat') }}</label>
-            <InputText id="a-vat" v-model="newForm.vatNumber" class="w-full" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" />
+            <InputText
+              id="a-vat"
+              v-model="newForm.vatNumber"
+              class="w-full"
+              :disabled="tinVerified"
+              :class="{ 'verified-field': tinVerified }"
+            />
           </div>
           <div>
             <label class="field-label" for="a-phone">{{ t('fields.phone') }}</label>
-            <InputText id="a-phone" v-model="newForm.phone" class="w-full" inputmode="tel" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" :invalid="!!formErrors.phone" />
+            <InputText
+              id="a-phone"
+              v-model="newForm.phone"
+              class="w-full"
+              inputmode="tel"
+              :disabled="tinVerified"
+              :class="{ 'verified-field': tinVerified }"
+              :invalid="!!formErrors.phone"
+            />
             <small v-if="formErrors.phone" class="field-error">{{ formErrors.phone }}</small>
           </div>
           <div>
             <label class="field-label" for="a-email">{{ t('fields.email') }}</label>
-            <InputText id="a-email" v-model="newForm.email" type="email" class="w-full" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" :invalid="!!formErrors.email" />
+            <InputText
+              id="a-email"
+              v-model="newForm.email"
+              type="email"
+              class="w-full"
+              :disabled="tinVerified"
+              :class="{ 'verified-field': tinVerified }"
+              :invalid="!!formErrors.email"
+            />
             <small v-if="formErrors.email" class="field-error">{{ formErrors.email }}</small>
           </div>
         </div>
         <div>
           <label class="field-label" for="a-business">{{ t('fields.business') }}</label>
-          <InputText id="a-business" v-model="newForm.natureOfBusiness" class="w-full" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" />
+          <InputText
+            id="a-business"
+            v-model="newForm.natureOfBusiness"
+            class="w-full"
+            :disabled="tinVerified"
+            :class="{ 'verified-field': tinVerified }"
+          />
         </div>
         <div>
           <label class="field-label" for="a-address">{{ t('fields.address') }}</label>
-          <InputText id="a-address" v-model="newForm.address" class="w-full" :disabled="tinVerified" :class="{ 'verified-field': tinVerified }" />
+          <InputText
+            id="a-address"
+            v-model="newForm.address"
+            class="w-full"
+            :disabled="tinVerified"
+            :class="{ 'verified-field': tinVerified }"
+          />
         </div>
       </form>
       <template #footer>
@@ -305,13 +435,16 @@ const saveNew = async () => {
 </template>
 
 <style scoped>
-.search-input { width: 320px; max-width: 100%; font-size: 0.82rem; border-radius: 8px; }
-.field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
-.field-error { display: block; color: #dc2626; font-size: 0.74rem; margin-top: 0.2rem; }
-.verified-field { background: #f0fdf4 !important; border-color: #86efac !important; }
-.state-box { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; padding: 2rem 1rem; color: #94a3b8; font-size: 0.86rem; }
 .search-result {
-  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
-  padding: 0.65rem 0.75rem; background: #f8faf9; border: 1px solid #f1f5f9; border-radius: 8px; margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 0.75rem;
+  background: #f8faf9;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
 }
 </style>

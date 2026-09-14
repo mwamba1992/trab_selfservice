@@ -1,7 +1,10 @@
 import api from './Api.js';
 
 const data = (res) => res.data.data;
-const page = (url) => async (page = 1, size = 10, search = '') => data(await api.get(url, { params: { page, size, search } }));
+const page =
+  (url) =>
+  async (page = 1, size = 10, search = '') =>
+    data(await api.get(url, { params: { page, size, search } }));
 
 function documentsApi(base) {
   return {
@@ -13,10 +16,12 @@ function documentsApi(base) {
       formData.append('file', file);
       formData.append('documentType', documentType || 'OTHER');
       if (remarks) formData.append('remarks', remarks);
-      return data(await api.post(`${base}/${id}/documents`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000,
-      }));
+      return data(
+        await api.post(`${base}/${id}/documents`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000,
+        }),
+      );
     },
   };
 }
@@ -143,6 +148,11 @@ export const SelfServiceSummons = {
 
 export const SelfServiceDecisions = {
   getAll: page('/self-service/decisions'),
+  /** Ownership-checked judgement PDF for an appeal; resolves to a Blob. */
+  async downloadJudgement(appealId) {
+    const res = await api.get(`/self-service/decisions/${appealId}/judgement`, { responseType: 'blob', timeout: 120000 });
+    return res.data;
+  },
 };
 
 export const SelfServiceCompany = {

@@ -10,13 +10,19 @@ const KEYS = {
 };
 
 const read = (key) => {
-  try { return localStorage.getItem(key); } catch { return null; }
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
 };
 const write = (key, value) => {
   try {
     if (value === null || value === undefined) localStorage.removeItem(key);
     else localStorage.setItem(key, value);
-  } catch { /* storage unavailable (private mode) — session lives for this page only */ }
+  } catch {
+    /* storage unavailable (private mode) — session lives for this page only */
+  }
 };
 
 export function decodeToken(token) {

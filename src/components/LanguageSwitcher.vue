@@ -55,7 +55,9 @@ const options = [
   padding: 0.5rem 1rem;
   font-size: 0.82rem;
 }
-.lang-switch button + button { border-left: 1px solid #e2e8f0; }
+.lang-switch button + button {
+  border-left: 1px solid #e2e8f0;
+}
 .lang-switch button.active {
   background: var(--trab-primary);
   color: #fff;

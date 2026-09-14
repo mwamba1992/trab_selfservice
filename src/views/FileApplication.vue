@@ -53,12 +53,20 @@ onMounted(async () => {
       RegionService.getAll(),
       TaxTypeService.getAll(),
     ]);
-    appellants.value = a.map((x) => ({ ...x, displayName: `${x.firstName} ${x.lastName || ''}`.trim() + (x.tinNumber ? ` (${x.tinNumber})` : '') }));
+    appellants.value = a.map((x) => ({
+      ...x,
+      displayName: `${x.firstName} ${x.lastName || ''}`.trim() + (x.tinNumber ? ` (${x.tinNumber})` : ''),
+    }));
     appeals.value = (ap.items || []).map((x) => ({ ...x, displayName: `${x.appealNo || x.dateOfFiling} — ${x.appellantName}` }));
     regions.value = r;
     taxTypes.value = tt;
   } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('fileApplication.lookupsFailed')), life: 5000 });
+    toast.add({
+      severity: 'error',
+      summary: t('common.error'),
+      detail: apiErrorMessage(err, t('fileApplication.lookupsFailed')),
+      life: 5000,
+    });
   }
 });
 
@@ -113,62 +121,135 @@ const submit = async () => {
       <section class="ss-card lg:col-span-2 flex flex-col gap-4">
         <div>
           <label class="field-label" for="app-appellant">{{ t('fields.appellant') }} *</label>
-          <Select v-model="form.appellantId" input-id="app-appellant" :options="appellants" option-label="displayName" option-value="id" :placeholder="t('fileApplication.selectAppellant')" class="w-full" filter :invalid="!!errors.appellantId" />
+          <Select
+            v-model="form.appellantId"
+            input-id="app-appellant"
+            :options="appellants"
+            option-label="displayName"
+            option-value="id"
+            :placeholder="t('fileApplication.selectAppellant')"
+            class="w-full"
+            filter
+            :invalid="!!errors.appellantId"
+          />
           <small v-if="errors.appellantId" class="field-error">{{ errors.appellantId }}</small>
-          <small v-else class="hint">{{ t('fileApplication.appellantHelp') }}</small>
+          <small v-else class="field-hint">{{ t('fileApplication.appellantHelp') }}</small>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="field-label" for="app-type">{{ t('applications.applicationType') }} *</label>
-            <Select v-model="form.applicationType" input-id="app-type" :options="typeOptions" option-label="label" option-value="value" :placeholder="t('fileNotice.select')" class="w-full" :invalid="!!errors.applicationType" />
+            <Select
+              v-model="form.applicationType"
+              input-id="app-type"
+              :options="typeOptions"
+              option-label="label"
+              option-value="value"
+              :placeholder="t('fileNotice.select')"
+              class="w-full"
+              :invalid="!!errors.applicationType"
+            />
             <small v-if="errors.applicationType" class="field-error">{{ errors.applicationType }}</small>
           </div>
           <div>
             <label class="field-label" for="app-appeal">{{ t('applications.relatedAppeal') }}</label>
-            <Select v-model="form.appealId" input-id="app-appeal" :options="appeals" option-label="displayName" option-value="id" :placeholder="t('fileApplication.noAppeal')" class="w-full" filter show-clear />
-            <small class="hint">{{ t('fileApplication.relatedAppealHelp') }}</small>
+            <Select
+              v-model="form.appealId"
+              input-id="app-appeal"
+              :options="appeals"
+              option-label="displayName"
+              option-value="id"
+              :placeholder="t('fileApplication.noAppeal')"
+              class="w-full"
+              filter
+              show-clear
+            />
+            <small class="field-hint">{{ t('fileApplication.relatedAppealHelp') }}</small>
           </div>
           <div>
             <label class="field-label" for="app-region">{{ t('fields.region') }}</label>
-            <Select v-model="form.regionId" input-id="app-region" :options="regions" option-label="name" option-value="id" :placeholder="t('fileNotice.selectRegion')" class="w-full" filter show-clear />
+            <Select
+              v-model="form.regionId"
+              input-id="app-region"
+              :options="regions"
+              option-label="name"
+              option-value="id"
+              :placeholder="t('fileNotice.selectRegion')"
+              class="w-full"
+              filter
+              show-clear
+            />
           </div>
           <div>
             <label class="field-label" for="app-tax">{{ t('fields.taxType') }}</label>
-            <Select v-model="form.taxTypeId" input-id="app-tax" :options="taxTypes" option-label="name" option-value="id" :placeholder="t('fileNotice.select')" class="w-full" filter show-clear />
+            <Select
+              v-model="form.taxTypeId"
+              input-id="app-tax"
+              :options="taxTypes"
+              option-label="name"
+              option-value="id"
+              :placeholder="t('fileNotice.select')"
+              class="w-full"
+              filter
+              show-clear
+            />
           </div>
         </div>
 
         <div>
           <label class="field-label" for="app-nature">{{ t('applications.nature') }} *</label>
-          <Textarea id="app-nature" v-model="form.natureOfApplication" rows="6" class="w-full" :maxlength="MAX_NATURE" :placeholder="t('fileApplication.naturePlaceholder')" :invalid="!!errors.natureOfApplication" />
+          <Textarea
+            id="app-nature"
+            v-model="form.natureOfApplication"
+            rows="6"
+            class="w-full"
+            :maxlength="MAX_NATURE"
+            :placeholder="t('fileApplication.naturePlaceholder')"
+            :invalid="!!errors.natureOfApplication"
+          />
           <div class="flex justify-between gap-2">
             <small v-if="errors.natureOfApplication" class="field-error">{{ errors.natureOfApplication }}</small>
-            <small v-else class="hint">{{ t('fileApplication.natureHelp') }}</small>
-            <small class="hint">{{ form.natureOfApplication.length }} / {{ MAX_NATURE }}</small>
+            <small v-else class="field-hint">{{ t('fileApplication.natureHelp') }}</small>
+            <small class="field-hint">{{ form.natureOfApplication.length }} / {{ MAX_NATURE }}</small>
           </div>
         </div>
       </section>
 
       <aside class="ss-card">
-        <h3 class="review-title">{{ t('fileApplication.reviewTitle') }}</h3>
-        <div class="view-row"><span class="view-label">{{ t('fields.appellant') }}</span><span class="view-value">{{ selectedAppellant?.displayName || t('common.dash') }}</span></div>
-        <div class="view-row"><span class="view-label">{{ t('applications.applicationType') }}</span><span class="view-value">{{ typeOptions.find((o) => o.value === form.applicationType)?.label || t('common.dash') }}</span></div>
-        <div class="view-row"><span class="view-label">{{ t('applications.relatedAppeal') }}</span><span class="view-value">{{ selectedAppeal?.displayName || t('fileApplication.noAppeal') }}</span></div>
+        <h3 class="section-heading">{{ t('fileApplication.reviewTitle') }}</h3>
+        <div class="view-row">
+          <span class="view-label">{{ t('fields.appellant') }}</span
+          ><span class="view-value">{{ selectedAppellant?.displayName || t('common.dash') }}</span>
+        </div>
+        <div class="view-row">
+          <span class="view-label">{{ t('applications.applicationType') }}</span
+          ><span class="view-value">{{ typeOptions.find((o) => o.value === form.applicationType)?.label || t('common.dash') }}</span>
+        </div>
+        <div class="view-row">
+          <span class="view-label">{{ t('applications.relatedAppeal') }}</span
+          ><span class="view-value">{{ selectedAppeal?.displayName || t('fileApplication.noAppeal') }}</span>
+        </div>
         <p class="fee-note"><i class="pi pi-info-circle"></i> {{ t('fileApplication.feeNote') }}</p>
-        <Button type="submit" :label="t('fileApplication.submitApplication')" icon="pi pi-check" class="trab-btn w-full" :loading="saving" />
+        <Button
+          type="submit"
+          :label="t('fileApplication.submitApplication')"
+          icon="pi pi-check"
+          class="trab-btn w-full"
+          :loading="saving"
+        />
       </aside>
     </form>
   </div>
 </template>
 
 <style scoped>
-.field-label { display: block; font-size: 0.78rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
-.field-error { display: block; color: #dc2626; font-size: 0.74rem; margin-top: 0.2rem; }
-.hint { display: block; font-size: 0.74rem; color: #94a3b8; margin-top: 0.2rem; }
-.review-title { font-size: 0.92rem; font-weight: 700; color: #1E293B; margin: 0 0 0.75rem; }
-.view-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; }
-.view-label { color: #64748B; flex-shrink: 0; }
-.view-value { color: #1E293B; font-weight: 500; text-align: right; word-break: break-word; }
-.fee-note { font-size: 0.76rem; color: #475569; background: #f8faf9; border-radius: 8px; padding: 0.65rem; margin: 1rem 0; line-height: 1.45; }
+.fee-note {
+  font-size: 0.76rem;
+  color: var(--trab-label);
+  background: var(--trab-soft-bg);
+  border-radius: 8px;
+  padding: 0.65rem;
+  margin: 1rem 0;
+  line-height: 1.45;
+}
 </style>

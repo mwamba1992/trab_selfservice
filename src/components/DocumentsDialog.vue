@@ -65,13 +65,17 @@ const load = async () => {
   }
 };
 
-watch(() => [props.visible, props.sourceId], ([visible]) => {
-  if (visible) {
-    docs.value = [];
-    resetForm();
-    load();
-  }
-}, { immediate: true });
+watch(
+  () => [props.visible, props.sourceId],
+  ([visible]) => {
+    if (visible) {
+      docs.value = [];
+      resetForm();
+      load();
+    }
+  },
+  { immediate: true },
+);
 
 const onFileSelect = (event) => {
   const selected = event.target.files?.[0] || null;
@@ -168,28 +172,61 @@ watch(previewVisible, (open) => {
           </div>
           <div class="sm:col-span-2">
             <label class="field-label" for="doc-file">{{ t('fields.file') }}</label>
-            <input id="doc-file" ref="fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="file-input" @change="onFileSelect" />
-            <small class="hint">{{ t('documents.allowed') }}</small>
+            <input
+              id="doc-file"
+              ref="fileInput"
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              class="file-input"
+              @change="onFileSelect"
+            />
+            <small class="field-hint">{{ t('documents.allowed') }}</small>
           </div>
         </div>
         <div class="flex justify-end mt-3">
-          <Button :label="t('documents.upload')" icon="pi pi-upload" size="small" class="trab-btn" :loading="uploading" :disabled="!file" @click="upload" />
+          <Button
+            :label="t('documents.upload')"
+            icon="pi pi-upload"
+            size="small"
+            class="trab-btn"
+            :loading="uploading"
+            :disabled="!file"
+            @click="upload"
+          />
         </div>
       </div>
 
       <DataTable :value="docs" :loading="loading" data-key="id" striped-rows size="small">
-        <Column :header="t('common.sn')" style="width:3rem"><template #body="{ index }">{{ index + 1 }}</template></Column>
+        <Column :header="t('common.sn')" class="w-12"
+          ><template #body="{ index }">{{ index + 1 }}</template></Column
+        >
         <Column field="originalName" :header="t('fields.fileName')" />
         <Column :header="t('fields.type')">
           <template #body="{ data }"><Tag :value="docTypeLabel(data.documentType)" severity="info" /></template>
         </Column>
-        <Column :header="t('fields.size')"><template #body="{ data }">{{ (Number(data.fileSize) / 1024).toFixed(1) }} KB</template></Column>
-        <Column style="width:4rem">
+        <Column :header="t('fields.size')"
+          ><template #body="{ data }">{{ (Number(data.fileSize) / 1024).toFixed(1) }} KB</template></Column
+        >
+        <Column class="w-16">
           <template #body="{ data }">
-            <Button icon="pi pi-eye" text rounded size="small" :loading="openingId === data.id" :aria-label="t('common.view')" v-tooltip.top="t('common.view')" @click="openDocument(data)" />
+            <Button
+              v-tooltip.top="t('common.view')"
+              icon="pi pi-eye"
+              text
+              rounded
+              size="small"
+              :loading="openingId === data.id"
+              :aria-label="t('common.view')"
+              @click="openDocument(data)"
+            />
           </template>
         </Column>
-        <template #empty><div class="text-center py-4 empty-text">{{ t('documents.empty') }}</div></template>
+        <template #empty
+          ><div class="empty-state">
+            <i class="pi pi-paperclip"></i>
+            <p>{{ t('documents.empty') }}</p>
+          </div></template
+        >
       </DataTable>
     </div>
     <template #footer><Button :label="t('common.close')" outlined @click="emit('update:visible', false)" /></template>
@@ -205,7 +242,7 @@ watch(previewVisible, (open) => {
   >
     <iframe v-if="previewKind === 'pdf'" :src="previewUrl" :title="previewName" class="preview-frame" />
     <div v-else-if="previewKind === 'image'" class="preview-image"><img :src="previewUrl" :alt="previewName" /></div>
-    <p v-else class="p-4 text-sm empty-text">{{ t('documents.noPreview') }}</p>
+    <p v-else class="p-4 text-sm text-subtle">{{ t('documents.noPreview') }}</p>
     <template #footer>
       <Button :label="t('common.download')" icon="pi pi-download" outlined @click="downloadPreview" />
       <Button :label="t('common.close')" outlined @click="previewVisible = false" />
@@ -214,13 +251,37 @@ watch(previewVisible, (open) => {
 </template>
 
 <style scoped>
-.upload-box { background: #f8faf9; border-radius: 8px; border: 1px solid #e2e8f0; padding: 0.9rem; }
-.upload-title { font-size: 0.85rem; font-weight: 600; color: var(--trab-primary); margin: 0 0 0.75rem; }
-.field-label { display: block; font-size: 0.76rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem; }
-.file-input { font-size: 0.82rem; max-width: 100%; }
-.hint { display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 0.25rem; }
-.empty-text { color: #94a3b8; font-size: 0.84rem; }
-.preview-frame { width: 100%; height: 100%; border: none; }
-.preview-image { height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f5f9; }
-.preview-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.upload-box {
+  background: var(--trab-soft-bg);
+  border-radius: 8px;
+  border: 1px solid var(--trab-border);
+  padding: 0.9rem;
+}
+.upload-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--trab-primary);
+  margin: 0 0 0.75rem;
+}
+.file-input {
+  font-size: 0.82rem;
+  max-width: 100%;
+}
+.preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.preview-image {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+}
+.preview-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
 </style>

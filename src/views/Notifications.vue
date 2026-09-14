@@ -85,7 +85,9 @@ const open = async (item) => {
       await SelfServiceNotifications.markRead(item.id);
       item.readAt = new Date().toISOString();
       profileStore.setUnread(profileStore.state.unreadCount - 1);
-    } catch { /* still navigate */ }
+    } catch {
+      /* still navigate */
+    }
   }
   if (item.link) router.push(item.link);
 };
@@ -118,13 +120,21 @@ const markAllRead = async () => {
         <SelectButton v-model="filter" :options="filterOptions" option-value="value" :allow-empty="false" @change="onFilter">
           <template #option="{ option }">{{ t(option.key) }}</template>
         </SelectButton>
-        <Button :label="t('notifications.markAllRead')" icon="pi pi-check-square" size="small" outlined :loading="markingAll" :disabled="profileStore.state.unreadCount === 0" @click="markAllRead" />
+        <Button
+          :label="t('notifications.markAllRead')"
+          icon="pi pi-check-square"
+          size="small"
+          outlined
+          :loading="markingAll"
+          :disabled="profileStore.state.unreadCount === 0"
+          @click="markAllRead"
+        />
       </div>
     </div>
 
     <div class="ss-card">
       <div v-if="failed" class="state-box" role="alert">
-        <i class="pi pi-exclamation-triangle" style="color:#dc2626"></i>
+        <i class="pi pi-exclamation-triangle icon-error"></i>
         <p>{{ t('notifications.loadFailed') }}</p>
         <Button :label="t('common.retry')" size="small" outlined @click="load(first / pageSize + 1)" />
       </div>
@@ -132,7 +142,7 @@ const markAllRead = async () => {
       <div v-else-if="loading && !items.length" class="state-box"><i class="pi pi-spin pi-spinner"></i></div>
 
       <div v-else-if="!items.length" class="state-box">
-        <i class="pi pi-bell" style="color:#cbd5e1;font-size:1.8rem"></i>
+        <i class="pi pi-bell icon-empty"></i>
         <p>{{ filter === 'unread' ? t('notifications.emptyUnread') : t('notifications.empty') }}</p>
       </div>
 
@@ -150,31 +160,90 @@ const markAllRead = async () => {
         </li>
       </ul>
 
-      <Paginator v-if="total > pageSize" :first="first" :rows="pageSize" :total-records="total" :rows-per-page-options="[10, 25, 50]" @page="onPage" />
+      <Paginator
+        v-if="total > pageSize"
+        :first="first"
+        :rows="pageSize"
+        :total-records="total"
+        :rows-per-page-options="[10, 25, 50]"
+        @page="onPage"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-.state-box { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; padding: 2.5rem 1rem; color: #94a3b8; font-size: 0.86rem; text-align: center; }
-.notification-list { list-style: none; margin: 0; padding: 0; }
-.notification-list.dimmed { opacity: 0.6; }
-.notification-list li + li { border-top: 1px solid #f1f5f9; }
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.notification-list.dimmed {
+  opacity: 0.6;
+}
+.notification-list li + li {
+  border-top: 1px solid #f1f5f9;
+}
 .notification {
-  width: 100%; display: flex; align-items: flex-start; gap: 0.8rem;
-  padding: 0.9rem 0.5rem; background: none; border: none; text-align: left;
-  cursor: pointer; font-family: inherit; border-radius: 8px;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.9rem 0.5rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 8px;
 }
-.notification:hover, .notification:focus-visible { background: #f8faf9; }
+.notification:hover,
+.notification:focus-visible {
+  background: #f8faf9;
+}
 .n-icon {
-  width: 2.2rem; height: 2.2rem; border-radius: 10px; flex-shrink: 0;
-  background: rgba(27,107,61,0.08); color: var(--trab-primary);
-  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: rgba(27, 107, 61, 0.08);
+  color: var(--trab-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.n-body { flex: 1; min-width: 0; }
-.n-title { display: block; font-size: 0.86rem; font-weight: 500; color: #1E293B; }
-.unread .n-title { font-weight: 700; }
-.n-message { display: block; font-size: 0.8rem; color: #475569; margin-top: 0.15rem; line-height: 1.45; }
-.n-time { display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 0.3rem; }
-.n-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #3B82F6; margin-top: 0.4rem; flex-shrink: 0; }
+.n-body {
+  flex: 1;
+  min-width: 0;
+}
+.n-title {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+.unread .n-title {
+  font-weight: 700;
+}
+.n-message {
+  display: block;
+  font-size: 0.8rem;
+  color: #475569;
+  margin-top: 0.15rem;
+  line-height: 1.45;
+}
+.n-time {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 0.3rem;
+}
+.n-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #3b82f6;
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+}
 </style>

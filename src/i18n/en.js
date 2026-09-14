@@ -493,15 +493,18 @@ export default {
     types: {
       NOTICE_FILED: {
         title: 'Notice of appeal filed',
-        message: 'Your notice of appeal for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive a notice number.',
+        message:
+          'Your notice of appeal for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive a notice number.',
       },
       APPEAL_FILED: {
         title: 'Statement of appeal filed',
-        message: 'Your statement of appeal for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive an appeal number.',
+        message:
+          'Your statement of appeal for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive an appeal number.',
       },
       APPLICATION_FILED: {
         title: 'Application filed',
-        message: 'Your application for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive an application number.',
+        message:
+          'Your application for {appellantName} was received. Pay control number {controlNumber} (TZS {amount}) to receive an application number.',
       },
       PAYMENT_RECEIVED: {
         title: 'Payment received',

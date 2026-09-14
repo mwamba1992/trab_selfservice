@@ -6,7 +6,13 @@ import { makeToken } from '@/test/tokens.js';
 
 const ok = (config, data = {}) => ({ data, status: 200, statusText: 'OK', headers: {}, config });
 const unauthorized = (config) =>
-  new AxiosError('Unauthorized', 'ERR_BAD_REQUEST', config, null, { data: {}, status: 401, statusText: 'Unauthorized', headers: {}, config });
+  new AxiosError('Unauthorized', 'ERR_BAD_REQUEST', config, null, {
+    data: {},
+    status: 401,
+    statusText: 'Unauthorized',
+    headers: {},
+    config,
+  });
 
 describe('Api session handling', () => {
   let expired;
@@ -40,8 +46,12 @@ describe('Api session handling', () => {
 
   it('ends the session when the refresh fails', async () => {
     session.setTokens({ accessToken: makeToken(600), refreshToken: makeToken(3600) });
-    authClient.defaults.adapter = async (config) => { throw unauthorized(config); };
-    api.defaults.adapter = async (config) => { throw unauthorized(config); };
+    authClient.defaults.adapter = async (config) => {
+      throw unauthorized(config);
+    };
+    api.defaults.adapter = async (config) => {
+      throw unauthorized(config);
+    };
 
     await expect(api.get('/secure')).rejects.toBeInstanceOf(AxiosError);
     expect(expired).toHaveBeenCalledTimes(1);
@@ -51,7 +61,9 @@ describe('Api session handling', () => {
   it('leaves a 401 without a session (e.g. a failed sign-in) to the caller', async () => {
     const refresh = vi.fn();
     authClient.defaults.adapter = refresh;
-    api.defaults.adapter = async (config) => { throw unauthorized(config); };
+    api.defaults.adapter = async (config) => {
+      throw unauthorized(config);
+    };
 
     await expect(api.post('/auth/otp/verify', {})).rejects.toBeInstanceOf(AxiosError);
     expect(refresh).not.toHaveBeenCalled();

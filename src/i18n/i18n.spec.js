@@ -36,7 +36,11 @@ describe('translations', () => {
   });
 
   it('every static key used in the source exists', () => {
-    const sources = import.meta.glob(['/src/**/*.vue', '/src/**/*.js', '!/src/**/*.spec.js'], { query: '?raw', import: 'default', eager: true });
+    const sources = import.meta.glob(['/src/**/*.vue', '/src/**/*.js', '!/src/**/*.spec.js'], {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    });
     const missing = new Set();
     for (const [file, code] of Object.entries(sources)) {
       for (const match of code.matchAll(/\bt\(\s*'([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+)'/g)) {

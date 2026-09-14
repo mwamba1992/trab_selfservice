@@ -14,7 +14,9 @@ export const authClient = axios.create({
   timeout: 15000,
 });
 
-let onSessionExpired = () => { window.location.href = '/welcome?expired=1'; };
+let onSessionExpired = () => {
+  window.location.href = '/welcome?expired=1';
+};
 
 /** The router registers a handler that keeps the user's place (see main.js). */
 export function setSessionExpiredHandler(handler) {

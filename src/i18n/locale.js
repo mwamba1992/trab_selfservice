@@ -11,5 +11,9 @@ export function getStoredLocale() {
 }
 
 export function storeLocale(locale) {
-  try { localStorage.setItem(STORAGE_KEY, locale); } catch { /* not persisted */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, locale);
+  } catch {
+    /* not persisted */
+  }
 }

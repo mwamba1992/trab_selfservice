@@ -263,6 +263,7 @@ export default {
     payBill: 'Go to Bills to pay for this notice',
     fileStatement: 'File a Statement of Appeal for this notice',
     documents: 'Documents',
+    printBill: 'Print bill',
     empty: 'No notices filed yet.',
     fileFirst: 'File your first notice',
     detailsTitle: 'Notice Details',

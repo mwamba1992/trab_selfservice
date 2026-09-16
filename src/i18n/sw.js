@@ -269,6 +269,7 @@ export default {
     payBill: 'Nenda kwenye Bili kulipia taarifa hii',
     fileStatement: 'Wasilisha Hati ya Rufani kwa taarifa hii',
     documents: 'Nyaraka',
+    printBill: 'Chapisha bili',
     empty: 'Bado hujawasilisha taarifa yoyote.',
     fileFirst: 'Wasilisha taarifa yako ya kwanza',
     detailsTitle: 'Taarifa Kamili',

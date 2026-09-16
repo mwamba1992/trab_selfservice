@@ -8,7 +8,10 @@ import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
-import { SelfServiceNotices as NoticeService } from '@/service/SelfServiceApi.js';
+import QRCode from 'qrcode';
+import BillDocument from '@/components/bills/BillDocument.vue';
+import { SelfServiceNotices as NoticeService, SelfServiceBills as BillingService } from '@/service/SelfServiceApi.js';
+import { printElement } from '@/utils/print.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
 import { apiErrorMessage } from '@/utils/format.js';
@@ -52,6 +55,29 @@ const openView = async (notice) => {
 };
 
 const returned = computed(() => returnedFilings(notices.value));
+
+// The bill for a notice, printable from this list so the appellant can pay at a bank.
+const billVisible = ref(false);
+const billData = ref(null);
+const billQr = ref('');
+const billDocument = ref(null);
+
+const openBill = async (notice) => {
+  if (!notice.billId && !notice.bill?.id) return;
+  openingId.value = notice.id;
+  try {
+    const full = await BillingService.getById(notice.billId || notice.bill.id);
+    billData.value = full;
+    billQr.value = full.billControlNumber ? await QRCode.toDataURL(full.billControlNumber, { width: 120, margin: 1 }) : '';
+    billVisible.value = true;
+  } catch (err) {
+    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('common.actionFailed')), life: 4000 });
+  } finally {
+    openingId.value = null;
+  }
+};
+
+const printBill = () => printElement(billDocument.value?.$el, `Bill - ${billData.value?.billReference || ''}`);
 
 // Mirrors the backend rule: a notice supports an appeal for 45 days unless exempted
 const isValid = (notice) => notice.isExempted || (daysSince(notice.loggedAt) ?? 0) <= 45;
@@ -165,6 +191,16 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
                 @click="openView(data)"
               />
               <Button
+                v-if="data.billId || data.bill"
+                v-tooltip.top="t('notices.printBill')"
+                icon="pi pi-print"
+                text
+                rounded
+                size="small"
+                :aria-label="t('notices.printBill')"
+                @click="openBill(data)"
+              />
+              <Button
                 v-if="data.paymentStatus !== 'PAID'"
                 v-tooltip.top="t('notices.payBill')"
                 icon="pi pi-wallet"
@@ -260,6 +296,21 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
         </div>
       </div>
       <template #footer><Button :label="t('common.close')" outlined @click="viewVisible = false" /></template>
+    </Dialog>
+
+    <Dialog
+      v-model:visible="billVisible"
+      :header="t('bills.title')"
+      modal
+      :style="{ width: '650px' }"
+      :breakpoints="{ '768px': '96vw' }"
+      :content-style="{ maxHeight: '80vh', overflowY: 'auto' }"
+    >
+      <BillDocument v-if="billData" ref="billDocument" :bill="billData" :qr-data-url="billQr" />
+      <template #footer>
+        <Button :label="t('common.close')" text @click="billVisible = false" />
+        <Button :label="t('common.print')" icon="pi pi-print" class="trab-btn" @click="printBill" />
+      </template>
     </Dialog>
   </div>
 </template>

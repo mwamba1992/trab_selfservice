@@ -7,8 +7,7 @@ import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
 import Skeleton from 'primevue/skeleton';
-import { SelfServiceAppeals } from '@/service/SelfServiceApi.js';
-import { Config } from '@/utils/Config.js';
+import { SelfServiceAppeals, SelfServiceFiles } from '@/service/SelfServiceApi.js';
 import { openPreview } from '@/utils/preview.js';
 import { apiErrorMessage } from '@/utils/format.js';
 
@@ -81,11 +80,7 @@ const preview = (item) =>
     fileName: item.originalName || item.fileName,
     title: item.originalName || 'Document',
     downloadName: item.originalName,
-    load: async () => {
-      const res = await fetch(`${Config.API_BASE_URL}/files/${item.fileName}`);
-      if (!res.ok) throw new Error('The document could not be opened');
-      return res.blob();
-    },
+    load: () => SelfServiceFiles.blob(item.fileName),
   });
 const partyLabel = (party) => (party === 'RESPONDENT' ? t('replies.byRespondent') : t('replies.byAppellant'));
 </script>

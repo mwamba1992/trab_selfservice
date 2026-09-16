@@ -170,6 +170,14 @@ export const SelfServiceApplications = {
   ...documentsApi('/self-service/applications'),
 };
 
+/** Stored uploads are served behind the token, so attachments are fetched, not linked. */
+export const SelfServiceFiles = {
+  async blob(fileName) {
+    const res = await api.get(`/uploads/${encodeURIComponent(fileName)}`, { responseType: 'blob', timeout: 120000 });
+    return res.data;
+  },
+};
+
 export const SelfServiceDocuments = {
   /** Ownership-checked download; resolves to a Blob. */
   async download(documentId) {

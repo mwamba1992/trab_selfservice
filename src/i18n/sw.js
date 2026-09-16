@@ -128,6 +128,10 @@ export default {
     SUPPORTING: 'Hati ya kuunga mkono',
     OTHER: 'Nyingine',
     JUDGEMENT: 'Hukumu',
+    PROCEEDINGS: 'Kumbukumbu za kesi',
+    DRAWN_ORDER: 'Amri iliyoandaliwa',
+    DECREE: 'Amri',
+    RULING: 'Uamuzi wa shauri dogo',
   },
   session: {
     expiredTitle: 'Muda wa kuingia umeisha',
@@ -396,6 +400,21 @@ export default {
     failed: 'Uwasilishaji umeshindwa',
     lookupsFailed: 'Imeshindwa kupakia machaguo ya fomu',
     feeNote: 'Bili yenye namba ya malipo hutolewa unapowasilisha. Namba ya maombi hutolewa baada ya malipo.',
+  },
+  copies: {
+    title: 'Nakala za uamuzi',
+    intro:
+      'Kumbukumbu za kesi, hukumu na amri iliyoandaliwa hutolewa kwa maombi. Kila moja ina ada, inayolipwa kwa namba ya malipo kabla nakala haijafunguka.',
+    fee: 'Ada {amount}',
+    request: 'Omba nakala',
+    requested: 'Nakala imeombwa. Lipa namba ya malipo {control} kisha itafunguka hapa.',
+    awaitingPayment: 'Inasubiri malipo — namba ya malipo {control}',
+    payNow: 'Lipa',
+    paid: 'Imelipwa',
+    paidOn: 'Imelipwa {amount}',
+    open: 'Fungua',
+    openFailed: 'Nakala imeshindwa kufunguka',
+    notIssued: 'Bado haijatolewa na Bodi',
   },
   filingStatus: {
     label: 'Usajili',

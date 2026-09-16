@@ -126,6 +126,10 @@ export default {
     SUPPORTING: 'Supporting document',
     OTHER: 'Other',
     JUDGEMENT: 'Judgement',
+    PROCEEDINGS: 'Proceedings',
+    DRAWN_ORDER: 'Drawn order',
+    DECREE: 'Decree',
+    RULING: 'Ruling',
   },
   session: {
     expiredTitle: 'Session ended',
@@ -390,6 +394,21 @@ export default {
     failed: 'Filing failed',
     lookupsFailed: 'Could not load form options',
     feeNote: 'A bill with a control number is created when you submit. Your application number is issued after payment.',
+  },
+  copies: {
+    title: 'Copies of the decision',
+    intro:
+      'The proceedings, judgement and drawn order are issued on request. Each carries a fee, paid by control number before the copy opens.',
+    fee: 'Fee {amount}',
+    request: 'Request copy',
+    requested: 'Copy requested. Pay control number {control} and it will open here.',
+    awaitingPayment: 'Awaiting payment — control number {control}',
+    payNow: 'Pay',
+    paid: 'Paid',
+    paidOn: 'Paid {amount}',
+    open: 'Open',
+    openFailed: 'The copy could not be opened',
+    notIssued: 'Not issued by the Board yet',
   },
   filingStatus: {
     label: 'Registry',

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -9,12 +8,11 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import { SelfServiceDecisions } from '@/service/SelfServiceApi.js';
+import DecisionCopiesDialog from '@/components/DecisionCopiesDialog.vue';
 import { usePagedList } from '@/composables/usePagedList.js';
-import { apiErrorMessage } from '@/utils/format.js';
 import { ensureDocumentStyles } from '@/utils/print.js';
 
 const { t } = useI18n();
-const toast = useToast();
 
 const { rows, total, loading, search, rowsPerPage, first, stats, onPage, onSearch } = usePagedList(SelfServiceDecisions.getAll, {
   errorKey: 'decisions.loadFailed',
@@ -24,30 +22,19 @@ const { rows, total, loading, search, rowsPerPage, first, stats, onPage, onSearc
 
 onMounted(() => ensureDocumentStyles());
 
+// Copies of the decree, ruling and drawn order — requested, paid, then opened.
+const copiesVisible = ref(false);
+const copiesDecision = ref(null);
+const openCopies = (row) => {
+  copiesDecision.value = row;
+  copiesVisible.value = true;
+};
+
 const viewVisible = ref(false);
 const viewData = ref(null);
 const openView = (row) => {
   viewData.value = row;
   viewVisible.value = true;
-};
-
-const downloading = ref(false);
-const downloadJudgement = async () => {
-  if (!viewData.value?.judgementFile) return;
-  downloading.value = true;
-  try {
-    const blob = await SelfServiceDecisions.downloadJudgement(viewData.value.id);
-    const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Judgement_${viewData.value.appealNo || 'decision'}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('decisions.downloadFailed')), life: 4000 });
-  } finally {
-    downloading.value = false;
-  }
 };
 
 const wonSeverity = (w) => (/appellant/i.test(w || '') ? 'success' : /tra|commissioner|respondent/i.test(w || '') ? 'danger' : 'secondary');
@@ -120,7 +107,7 @@ const wonSeverity = (w) => (/appellant/i.test(w || '') ? 'success' : /tra|commis
             }}</span></template
           >
         </Column>
-        <Column :header="t('common.actions')" class="w-24">
+        <Column :header="t('common.actions')" class="w-28">
           <template #body="{ data }">
             <Button
               v-tooltip.top="t('decisions.viewDecision')"
@@ -130,6 +117,15 @@ const wonSeverity = (w) => (/appellant/i.test(w || '') ? 'success' : /tra|commis
               size="small"
               :aria-label="t('decisions.viewDecision')"
               @click="openView(data)"
+            />
+            <Button
+              v-tooltip.top="t('copies.title')"
+              icon="pi pi-copy"
+              text
+              rounded
+              size="small"
+              :aria-label="t('copies.title')"
+              @click="openCopies(data)"
             />
           </template>
         </Column>
@@ -186,20 +182,25 @@ const wonSeverity = (w) => (/appellant/i.test(w || '') ? 'success' : /tra|commis
         <div class="section-title">{{ t('decisions.decreeSection') }}</div>
         <p class="decree">{{ viewData.summaryOfDecree || t('decisions.noSummary') }}</p>
 
+        <!-- The judgement is a paid copy, so it is obtained through the copies dialog. -->
         <Button
           v-if="viewData.judgementFile"
-          :label="t('decisions.downloadJudgement')"
-          icon="pi pi-file-pdf"
+          :label="t('copies.title')"
+          icon="pi pi-copy"
           outlined
           class="mt-4"
-          :loading="downloading"
-          @click="downloadJudgement"
+          @click="
+            viewVisible = false;
+            openCopies(viewData);
+          "
         />
       </div>
       <template #footer>
         <Button :label="t('common.close')" text @click="viewVisible = false" />
       </template>
     </Dialog>
+
+    <DecisionCopiesDialog v-model:visible="copiesVisible" :decision="copiesDecision" />
   </div>
 </template>
 

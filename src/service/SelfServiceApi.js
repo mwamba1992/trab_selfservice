@@ -118,6 +118,13 @@ export const SelfServiceAppeals = {
   async resubmit(id, corrections) {
     return data(await api.post(`/self-service/appeals/${id}/resubmit`, corrections));
   },
+  /** Copies of the decree, ruling and drawn order, with what each costs and whether it is paid. */
+  async getCopies(appealId) {
+    return data(await api.get(`/self-service/appeals/${appealId}/copies`));
+  },
+  async requestCopy(appealId, documentType) {
+    return data(await api.post(`/self-service/appeals/${appealId}/copies`, { documentType }));
+  },
   ...documentsApi('/self-service/appeals'),
 };
 

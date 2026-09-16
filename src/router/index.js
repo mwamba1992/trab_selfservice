@@ -68,6 +68,12 @@ const routes = [
         component: () => import('@/views/tra/TraDecisions.vue'),
         meta: { audience: AUDIENCES.TRA },
       },
+      {
+        path: 'tra/officers',
+        name: 'TraOfficers',
+        component: () => import('@/views/tra/TraOfficers.vue'),
+        meta: { audience: AUDIENCES.TRA, permission: 'TRA Manage Users' },
+      },
     ],
   },
   { path: '/welcome', name: 'Landing', component: () => import('@/views/pages/auth/Landing.vue') },
@@ -109,6 +115,10 @@ router.beforeEach((to) => {
   }
   // Signed in on the wrong desk: send the officer or appellant to their own home.
   if (signedIn && to.matched.some((r) => r.meta.requiresAuth) && !allowedAudience(to.meta.audience, userType)) {
+    return homeFor(userType);
+  }
+  // A page the account's permissions don't reach (the API enforces this too).
+  if (signedIn && to.meta.permission && !session.getPermissions().includes(to.meta.permission)) {
     return homeFor(userType);
   }
   return true;

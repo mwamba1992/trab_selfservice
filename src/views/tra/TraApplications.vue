@@ -13,6 +13,7 @@ import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage, formatDate, formatDateTime, humanize } from '@/utils/format.js';
 import { isInteractiveTarget } from '@/utils/tra/lists.js';
 import SectionError from '@/components/tra/SectionError.vue';
+import LodgeApplicationDialog from '@/components/tra/LodgeApplicationDialog.vue';
 
 // The TRA desk is English by policy, so this view carries no translation keys.
 const toast = useToast();
@@ -53,6 +54,9 @@ const reload = () => {
   page.value = 1;
   load();
 };
+
+// TRA lodging its own application with the Board.
+const lodgeVisible = ref(false);
 
 const runSearch = () => reload();
 const clearSearch = () => {
@@ -134,9 +138,14 @@ onMounted(load);
 
 <template>
   <div>
-    <div class="page-header">
-      <h2>Applications</h2>
-      <p>Applications before the Board on appeals against TRA, and standalone applications. Open one to read it and file TRA's response.</p>
+    <div class="page-header applications-header">
+      <div>
+        <h2>Applications</h2>
+        <p>
+          Applications before the Board on appeals against TRA, and standalone applications. Open one to read it and file TRA's response.
+        </p>
+      </div>
+      <Button v-if="canRespond" label="Lodge application" icon="pi pi-plus" class="trab-btn" size="small" @click="lodgeVisible = true" />
     </div>
 
     <div class="ss-card">
@@ -295,10 +304,19 @@ onMounted(load);
         </template>
       </div>
     </Dialog>
+
+    <LodgeApplicationDialog v-model:visible="lodgeVisible" @lodged="reload" />
   </div>
 </template>
 
 <style scoped>
+.applications-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 .search-bar {
   display: flex;
   flex-wrap: wrap;

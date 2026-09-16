@@ -38,6 +38,7 @@ const traNav = computed(() => [
   { to: '/tra/applications', icon: 'pi pi-inbox', label: 'Applications' },
   { to: '/tra/summons', icon: 'pi pi-calendar', label: 'Hearings' },
   { to: '/tra/decisions', icon: 'pi pi-verified', label: 'Decisions' },
+  ...(AuthService.can('TRA Manage Users') ? [{ to: '/tra/officers', icon: 'pi pi-users', label: 'Officers' }] : []),
 ]);
 
 const navItems = computed(() => (isTra.value ? traNav.value : appellantNav.value));

@@ -145,6 +145,10 @@ export const TraApi = {
   async applications(page = 1, size = 10, search = '') {
     return data(await api.get('/tra/applications', { params: { page, size, ...trimmed(search) } }));
   },
+  /** TRA lodging its own application with the Board: no fee, no control number. */
+  async lodgeApplication(payload) {
+    return data(await api.post('/tra/applications', payload));
+  },
   async applicationResponses(id) {
     return data(await api.get(`/tra/applications/${id}/responses`));
   },

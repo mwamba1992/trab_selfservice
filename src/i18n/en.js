@@ -390,6 +390,16 @@ export default {
     lookupsFailed: 'Could not load form options',
     feeNote: 'A bill with a control number is created when you submit. Your application number is issued after payment.',
   },
+  filingStatus: {
+    label: 'Registry',
+    submitted: 'Waiting to be checked',
+    returned: 'Returned for correction',
+    awaitingPayment: 'Accepted — pay the control number',
+    registered: 'Registered',
+    returnedBannerOne: 'One filing was returned for correction.',
+    returnedBannerMany: '{count} filings were returned for correction.',
+    reason: 'Reason',
+  },
   documents: {
     title: 'Documents — {ref}',
     upload: 'Upload Document',

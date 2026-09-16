@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
@@ -14,6 +14,7 @@ import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import { filingState, returnedFilings } from '@/utils/filingStatus.js';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -74,6 +75,7 @@ onMounted(() => {
 });
 
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
+const returned = computed(() => returnedFilings(appeals.value));
 </script>
 
 <template>
@@ -95,6 +97,20 @@ const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUD
       <div class="stat-item">
         <div class="stat-dot bg-[#F59E0B]"></div>
         {{ t('common.pending') }}: <strong>{{ stats.pending }}</strong>
+      </div>
+    </div>
+
+    <div v-if="returned.length" class="returned-banner" role="alert">
+      <i class="pi pi-exclamation-circle"></i>
+      <div>
+        <strong>{{
+          returned.length === 1 ? t('filingStatus.returnedBannerOne') : t('filingStatus.returnedBannerMany', { count: returned.length })
+        }}</strong>
+        <ul>
+          <li v-for="r in returned" :key="r.id">
+            {{ r.appellantName }}<template v-if="r.returnReason"> — {{ t('filingStatus.reason') }}: {{ r.returnReason }}</template>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -137,6 +153,12 @@ const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUD
         >
         <Column :header="t('common.status')">
           <template #body="{ data }"><Tag :value="statusLabel(data.statusTrend)" :severity="statusSeverity(data.statusTrend)" /></template>
+        </Column>
+        <Column :header="t('filingStatus.label')">
+          <template #body="{ data }">
+            <Tag :value="t(filingState(data).key)" :severity="filingState(data).severity" />
+            <p v-if="data.filingStatus === 'RETURNED' && data.returnReason" class="reason">{{ data.returnReason }}</p>
+          </template>
         </Column>
         <Column :header="t('fields.payment')">
           <template #body="{ data }"
@@ -278,5 +300,27 @@ const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUD
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
+}
+.returned-banner {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+.returned-banner ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+}
+.reason {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #991b1b;
 }
 </style>

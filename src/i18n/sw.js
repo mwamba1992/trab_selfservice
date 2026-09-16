@@ -396,6 +396,16 @@ export default {
     lookupsFailed: 'Imeshindwa kupakia machaguo ya fomu',
     feeNote: 'Bili yenye namba ya malipo hutolewa unapowasilisha. Namba ya maombi hutolewa baada ya malipo.',
   },
+  filingStatus: {
+    label: 'Usajili',
+    submitted: 'Inasubiri kuhakikiwa',
+    returned: 'Imerudishwa kwa marekebisho',
+    awaitingPayment: 'Imekubaliwa — lipa namba ya malipo',
+    registered: 'Imesajiliwa',
+    returnedBannerOne: 'Uwasilishaji mmoja umerudishwa kwa marekebisho.',
+    returnedBannerMany: 'Mawasilisho {count} yamerudishwa kwa marekebisho.',
+    reason: 'Sababu',
+  },
   documents: {
     title: 'Nyaraka — {ref}',
     upload: 'Pakia Nyaraka',

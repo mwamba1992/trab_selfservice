@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -12,6 +12,7 @@ import { SelfServiceNotices as NoticeService } from '@/service/SelfServiceApi.js
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import { filingState, returnedFilings } from '@/utils/filingStatus.js';
 import { daysSince } from '@/utils/validators.js';
 
 const { t } = useI18n();
@@ -50,6 +51,8 @@ const openView = async (notice) => {
   }
 };
 
+const returned = computed(() => returnedFilings(notices.value));
+
 // Mirrors the backend rule: a notice supports an appeal for 45 days unless exempted
 const isValid = (notice) => notice.isExempted || (daysSince(notice.loggedAt) ?? 0) <= 45;
 const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
@@ -78,6 +81,20 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
       <div class="stat-item">
         <div class="stat-dot bg-[#3B82F6]"></div>
         {{ statusLabel('VALID') }}: <strong>{{ stats.valid }}</strong>
+      </div>
+    </div>
+
+    <div v-if="returned.length" class="returned-banner" role="alert">
+      <i class="pi pi-exclamation-circle"></i>
+      <div>
+        <strong>{{
+          returned.length === 1 ? t('filingStatus.returnedBannerOne') : t('filingStatus.returnedBannerMany', { count: returned.length })
+        }}</strong>
+        <ul>
+          <li v-for="r in returned" :key="r.id">
+            {{ r.appellantName }}<template v-if="r.returnReason"> — {{ t('filingStatus.reason') }}: {{ r.returnReason }}</template>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -118,6 +135,12 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
         </Column>
         <Column field="loggedAt" :header="t('notices.dateLodged')" />
         <Column field="appellantName" :header="t('fields.appellant')" />
+        <Column :header="t('filingStatus.label')">
+          <template #body="{ data }">
+            <Tag :value="t(filingState(data).key)" :severity="filingState(data).severity" />
+            <p v-if="data.filingStatus === 'RETURNED' && data.returnReason" class="reason">{{ data.returnReason }}</p>
+          </template>
+        </Column>
         <Column :header="t('fields.payment')">
           <template #body="{ data }"
             ><Tag :value="statusLabel(data.paymentStatus || 'UNPAID')" :severity="paymentSeverity(data.paymentStatus)"
@@ -223,6 +246,14 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
             ><Tag :value="statusLabel(isValid(viewData) ? 'VALID' : 'EXPIRED')" :severity="isValid(viewData) ? 'success' : 'danger'"
           /></span>
         </div>
+        <div class="view-row">
+          <span class="view-label">{{ t('filingStatus.label') }}</span>
+          <span class="view-value"><Tag :value="t(filingState(viewData).key)" :severity="filingState(viewData).severity" /></span>
+        </div>
+        <div v-if="viewData.returnReason" class="view-row">
+          <span class="view-label">{{ t('filingStatus.reason') }}</span>
+          <span class="view-value">{{ viewData.returnReason }}</span>
+        </div>
         <div v-if="viewData.bill" class="view-row">
           <span class="view-label">{{ t('fields.controlNumber') }}</span>
           <span class="view-value">{{ viewData.bill?.billControlNumber || t('bills.pendingControl') }}</span>
@@ -232,3 +263,28 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.returned-banner {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+.returned-banner ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+}
+.reason {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #991b1b;
+}
+</style>

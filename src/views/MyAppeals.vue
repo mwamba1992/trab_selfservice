@@ -11,6 +11,7 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import DocumentsDialog from '@/components/DocumentsDialog.vue';
 import ResubmitDialog from '@/components/ResubmitDialog.vue';
+import SubmissionsDialog from '@/components/SubmissionsDialog.vue';
 import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
@@ -78,6 +79,14 @@ onMounted(() => {
 
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
 const returned = computed(() => returnedFilings(appeals.value));
+
+// Written submissions for the next hearing.
+const submissionsVisible = ref(false);
+const submissionsAppeal = ref(null);
+const openSubmissions = (appeal) => {
+  submissionsAppeal.value = appeal;
+  submissionsVisible.value = true;
+};
 
 // Correcting what the registry sent back.
 const correctVisible = ref(false);
@@ -198,6 +207,15 @@ const openCorrect = (appeal) => {
                 @click="openDocuments(data)"
               />
               <Button
+                v-tooltip.top="t('submissions.title')"
+                icon="pi pi-file-edit"
+                text
+                rounded
+                size="small"
+                :aria-label="t('submissions.title')"
+                @click="openSubmissions(data)"
+              />
+              <Button
                 v-if="data.filingStatus === 'RETURNED'"
                 v-tooltip.top="t('filingStatus.correctTitle')"
                 icon="pi pi-pencil"
@@ -302,6 +320,8 @@ const openCorrect = (appeal) => {
       charges-annextures
       :reference="docsAppeal?.appealNo || docsAppeal?.appellantName || ''"
     />
+
+    <SubmissionsDialog v-model:visible="submissionsVisible" :appeal="submissionsAppeal" />
 
     <ResubmitDialog v-model:visible="correctVisible" kind="appeal" :record="correctData" :api="AppealService" @resubmitted="refresh" />
   </div>

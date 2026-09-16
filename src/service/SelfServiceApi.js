@@ -125,6 +125,22 @@ export const SelfServiceAppeals = {
   async requestCopy(appealId, documentType) {
     return data(await api.post(`/self-service/appeals/${appealId}/copies`, { documentType }));
   },
+  /** Both sides' written submissions for the next hearing, with the closing day. */
+  async getSubmissions(appealId) {
+    return data(await api.get(`/self-service/appeals/${appealId}/submissions`));
+  },
+  async fileSubmission(appealId, { stage, body, file }) {
+    const formData = new FormData();
+    formData.append('stage', stage);
+    if (body) formData.append('body', body);
+    if (file) formData.append('file', file);
+    return data(
+      await api.post(`/self-service/appeals/${appealId}/submissions`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+      }),
+    );
+  },
   ...documentsApi('/self-service/appeals'),
 };
 

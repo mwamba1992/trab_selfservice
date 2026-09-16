@@ -4,6 +4,7 @@ import AppTopbar from './AppTopbar.vue';
 import AppFooter from './AppFooter.vue';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
+import FilePreviewDialog from '@/components/tra/FilePreviewDialog.vue';
 
 const { t } = useI18n();
 </script>
@@ -15,6 +16,7 @@ const { t } = useI18n();
       <Toast position="top-right" :breakpoints="{ '640px': { width: '92vw', right: '4vw', left: '4vw' } }" />
       <ConfirmDialog :breakpoints="{ '640px': '92vw' }" :accept-label="t('confirm.accept')" :reject-label="t('confirm.reject')" />
       <router-view />
+      <FilePreviewDialog />
     </main>
     <AppFooter />
   </div>

@@ -31,7 +31,14 @@ const appellantNav = computed(() => [
 ]);
 
 // TRA screens are English by policy, so these labels are not translated.
-const traNav = computed(() => [{ to: '/tra/dashboard', icon: 'pi pi-home', label: 'Dashboard' }]);
+const traNav = computed(() => [
+  { to: '/tra/dashboard', icon: 'pi pi-home', label: 'Dashboard' },
+  { to: '/tra/notices', icon: 'pi pi-file', label: 'Notices' },
+  { to: '/tra/appeals', icon: 'pi pi-briefcase', label: 'Appeals' },
+  { to: '/tra/applications', icon: 'pi pi-inbox', label: 'Applications' },
+  { to: '/tra/summons', icon: 'pi pi-calendar', label: 'Hearings' },
+  { to: '/tra/decisions', icon: 'pi pi-verified', label: 'Decisions' },
+]);
 
 const navItems = computed(() => (isTra.value ? traNav.value : appellantNav.value));
 const homePath = computed(() => (isTra.value ? '/tra/dashboard' : '/dashboard'));

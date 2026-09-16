@@ -402,6 +402,8 @@ export default {
     loadFailed: 'Could not load documents',
     openFailed: 'Could not open the document',
     noPreview: 'This file type cannot be previewed. Use Download instead.',
+    annexureFee: 'Each annexure carries a fee, added to your bill when the registry accepts the filing.',
+    attachNow: 'Filed. Attach your annexures now — you can keep adding them until the registry checks your filing.',
   },
   bills: {
     title: 'My Bills',

@@ -8,7 +8,6 @@ import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
-import DocumentsDialog from '@/components/DocumentsDialog.vue';
 import { SelfServiceNotices as NoticeService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
@@ -38,8 +37,6 @@ const {
 const viewVisible = ref(false);
 const viewData = ref(null);
 const openingId = ref(null);
-const docsVisible = ref(false);
-const docsNotice = ref(null);
 
 const openView = async (notice) => {
   openingId.value = notice.id;
@@ -51,11 +48,6 @@ const openView = async (notice) => {
   } finally {
     openingId.value = null;
   }
-};
-
-const openDocuments = (notice) => {
-  docsNotice.value = notice;
-  docsVisible.value = true;
 };
 
 // Mirrors the backend rule: a notice supports an appeal for 45 days unless exempted
@@ -150,15 +142,6 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
                 @click="openView(data)"
               />
               <Button
-                v-tooltip.top="t('notices.documents')"
-                icon="pi pi-paperclip"
-                text
-                rounded
-                size="small"
-                :aria-label="t('notices.documents')"
-                @click="openDocuments(data)"
-              />
-              <Button
                 v-if="data.paymentStatus !== 'PAID'"
                 v-tooltip.top="t('notices.payBill')"
                 icon="pi pi-wallet"
@@ -247,12 +230,5 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
       </div>
       <template #footer><Button :label="t('common.close')" outlined @click="viewVisible = false" /></template>
     </Dialog>
-
-    <DocumentsDialog
-      v-model:visible="docsVisible"
-      :api="NoticeService"
-      :source-id="docsNotice?.id"
-      :reference="docsNotice?.noticeNo || docsNotice?.appellantName || ''"
-    />
   </div>
 </template>

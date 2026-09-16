@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -62,6 +63,15 @@ const openDocuments = (appeal) => {
   docsAppeal.value = appeal;
   docsVisible.value = true;
 };
+
+// Arriving straight from filing: open the annexure window for the new appeal.
+const route = useRoute();
+onMounted(() => {
+  const attach = route.query.attach;
+  if (!attach) return;
+  openDocuments({ id: String(attach) });
+  toast.add({ severity: 'info', summary: t('common.success'), detail: t('documents.attachNow'), life: 7000 });
+});
 
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
 </script>
@@ -245,6 +255,8 @@ const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUD
       v-model:visible="docsVisible"
       :api="AppealService"
       :source-id="docsAppeal?.id"
+      default-type="ANNEXTURE"
+      charges-annextures
       :reference="docsAppeal?.appealNo || docsAppeal?.appellantName || ''"
     />
   </div>

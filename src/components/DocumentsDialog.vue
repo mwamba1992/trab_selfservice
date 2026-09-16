@@ -19,6 +19,9 @@ const props = defineProps({
   api: { type: Object, required: true },
   sourceId: { type: String, default: null },
   reference: { type: String, default: '' },
+  // Appeals arrive with annexures, which carry a fee; notices do not.
+  defaultType: { type: String, default: 'OTHER' },
+  chargesAnnextures: { type: Boolean, default: false },
 });
 const emit = defineEmits(['update:visible']);
 
@@ -36,7 +39,7 @@ const docs = ref([]);
 const loading = ref(false);
 const file = ref(null);
 const fileInput = ref(null);
-const docType = ref('OTHER');
+const docType = ref(props.defaultType);
 const remarks = ref('');
 const uploading = ref(false);
 
@@ -48,7 +51,7 @@ const extensionOf = (name) => (name?.split('.').pop() || '').toLowerCase();
 
 const resetForm = () => {
   file.value = null;
-  docType.value = 'OTHER';
+  docType.value = props.defaultType;
   remarks.value = '';
   if (fileInput.value) fileInput.value.value = '';
 };
@@ -181,6 +184,7 @@ watch(previewVisible, (open) => {
               @change="onFileSelect"
             />
             <small class="field-hint">{{ t('documents.allowed') }}</small>
+            <small v-if="chargesAnnextures && docType === 'ANNEXTURE'" class="field-hint">{{ t('documents.annexureFee') }}</small>
           </div>
         </div>
         <div class="flex justify-end mt-3">

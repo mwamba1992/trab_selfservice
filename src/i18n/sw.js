@@ -408,6 +408,9 @@ export default {
     loadFailed: 'Imeshindwa kupakia nyaraka',
     openFailed: 'Imeshindwa kufungua nyaraka',
     noPreview: 'Aina hii ya faili haiwezi kuonyeshwa. Tumia Pakua badala yake.',
+    annexureFee: 'Kila kiambatisho kina ada, itakayoongezwa kwenye bili yako pale msajili atakapokubali uwasilishaji.',
+    attachNow:
+      'Imewasilishwa. Ambatisha viambatisho vyako sasa — unaweza kuendelea kuviongeza hadi msajili atakapohakiki uwasilishaji wako.',
   },
   bills: {
     title: 'Bili Zangu',

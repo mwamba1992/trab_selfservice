@@ -143,7 +143,7 @@ const submit = async () => {
   }
   saving.value = true;
   try {
-    await SelfServiceAppeals.create({
+    const appeal = await SelfServiceAppeals.create({
       ...form.value,
       noticeNo: form.value.noticeNo || undefined,
       // First appellant is the primary appellant, the rest are co-appellants
@@ -155,7 +155,8 @@ const submit = async () => {
     });
     draft.clear();
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('fileAppeal.filed'), life: 5000 });
-    router.push('/appeals');
+    // Straight to the annexure window: they can attach until the registry checks it.
+    router.push({ path: '/appeals', query: appeal?.id ? { attach: appeal.id } : {} });
   } catch (err) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('fileAppeal.failed')), life: 6000 });
   } finally {

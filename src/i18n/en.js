@@ -417,6 +417,12 @@ export default {
     openFailed: 'The copy could not be opened',
     notIssued: 'Not issued by the Board yet',
   },
+  files: {
+    choose: 'Choose a file',
+    hint: 'PDF or Word, or drop it here',
+    hintAny: 'PDF, image or Word up to 10 MB',
+    remove: 'Remove the file',
+  },
   replies: {
     title: 'Replies',
     intro: 'TRA files its statement of defence here, and you answer it. A reply may be typed, attached, or both.',

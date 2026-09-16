@@ -10,6 +10,7 @@ import Skeleton from 'primevue/skeleton';
 import { SelfServiceAppeals, SelfServiceFiles } from '@/service/SelfServiceApi.js';
 import { openPreview } from '@/utils/preview.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -25,7 +26,6 @@ const loading = ref(false);
 const filing = ref(false);
 const body = ref('');
 const file = ref(null);
-const fileInput = ref(null);
 
 // The appellant answers TRA's defence, so there must be one on record first.
 const defenceOnRecord = computed(() => replies.value.some((r) => r.party === 'RESPONDENT'));
@@ -53,10 +53,6 @@ watch(
   },
 );
 
-const pickFile = (event) => {
-  file.value = event.target.files?.[0] || null;
-};
-
 const submit = async () => {
   filing.value = true;
   try {
@@ -64,7 +60,6 @@ const submit = async () => {
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('replies.filed'), life: 5000 });
     body.value = '';
     file.value = null;
-    if (fileInput.value) fileInput.value.value = '';
     await load();
   } catch (err) {
     // The API explains why a reply was refused; show its words, not ours.
@@ -124,7 +119,14 @@ const partyLabel = (party) => (party === 'RESPONDENT' ? t('replies.byRespondent'
       </div>
       <div class="field">
         <label for="reply-file">{{ t('replies.fileLabel') }}</label>
-        <input id="reply-file" ref="fileInput" type="file" accept=".pdf,.doc,.docx" @change="pickFile" />
+        <FilePicker
+          v-model="file"
+          input-id="replies-file"
+          accept=".pdf,.doc,.docx"
+          :label="t('files.choose')"
+          :hint="t('files.hint')"
+          :remove-label="t('files.remove')"
+        />
       </div>
       <Button :label="t('replies.file')" icon="pi pi-send" class="trab-btn" :disabled="!canFile" :loading="filing" @click="submit" />
     </template>

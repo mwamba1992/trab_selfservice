@@ -423,6 +423,12 @@ export default {
     openFailed: 'Nakala imeshindwa kufunguka',
     notIssued: 'Bado haijatolewa na Bodi',
   },
+  files: {
+    choose: 'Chagua faili',
+    hint: 'PDF au Word, au liburute hapa',
+    hintAny: 'PDF, picha au Word hadi MB 10',
+    remove: 'Ondoa faili',
+  },
   replies: {
     title: 'Majibu',
     intro: 'TRA huwasilisha majibu yake ya utetezi hapa, nawe unayajibu. Jibu linaweza kuandikwa, kuambatishwa, au vyote viwili.',

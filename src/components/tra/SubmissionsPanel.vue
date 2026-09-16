@@ -11,6 +11,7 @@ import { SUBMISSION_STAGES } from '@/utils/submissions.js';
 import { windowState } from '@/utils/tra/submissionWindow.js';
 import { fileIcon, useStoredFile } from '@/utils/tra/files.js';
 import SectionError from './SectionError.vue';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   appeal: { type: Object, required: true },
@@ -35,7 +36,6 @@ const filing = ref(false);
 const stage = ref('REPLY');
 const body = ref('');
 const attachment = ref(null);
-const fileInput = ref(null);
 
 const state = computed(() => windowState(win.value));
 const submissions = computed(() => win.value?.submissions ?? []);
@@ -57,17 +57,12 @@ const load = async () => {
   }
 };
 
-const onPick = (event) => {
-  attachment.value = event.target.files?.[0] ?? null;
-};
-
 const submit = async () => {
   filing.value = true;
   try {
     await TraApi.fileSubmission(props.appeal.id, { stage: stage.value, body: body.value, file: attachment.value });
     body.value = '';
     attachment.value = null;
-    if (fileInput.value) fileInput.value.value = '';
     toast.add({ severity: 'success', summary: 'Filed', detail: 'Written submission filed', life: 3000 });
     await load();
     emit('filed');
@@ -121,7 +116,14 @@ onMounted(load);
       </div>
       <div class="field">
         <label for="submission-file">Attach a document (optional)</label>
-        <input id="submission-file" ref="fileInput" type="file" accept=".pdf,.doc,.docx" @change="onPick" />
+        <FilePicker
+          v-model="attachment"
+          input-id="submission-file"
+          accept=".pdf,.doc,.docx"
+          label="Choose a document"
+          hint="PDF or Word, or drop it here"
+          :disabled="filing"
+        />
       </div>
       <div>
         <Button label="File submission" icon="pi pi-send" class="trab-btn" :disabled="!canSubmit" :loading="filing" @click="submit" />

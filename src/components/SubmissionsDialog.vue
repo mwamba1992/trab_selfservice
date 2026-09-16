@@ -12,6 +12,7 @@ import { SelfServiceAppeals, SelfServiceFiles } from '@/service/SelfServiceApi.j
 import { openPreview } from '@/utils/preview.js';
 import { apiErrorMessage } from '@/utils/format.js';
 import { SUBMISSION_STAGES, nextStage, stageKey, windowState } from '@/utils/submissions.js';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -58,10 +59,6 @@ watch(
     load();
   },
 );
-
-const pickFile = (event) => {
-  file.value = event.target.files?.[0] || null;
-};
 
 const submit = async () => {
   filing.value = true;
@@ -127,7 +124,14 @@ const partyLabel = (party) => (party === 'APPELLANT' ? t('submissions.byAppellan
       </div>
       <div class="field">
         <label for="submission-file">{{ t('submissions.fileLabel') }}</label>
-        <input id="submission-file" type="file" accept=".pdf,.doc,.docx" @change="pickFile" />
+        <FilePicker
+          v-model="file"
+          input-id="submissions-file"
+          accept=".pdf,.doc,.docx"
+          :label="t('files.choose')"
+          :hint="t('files.hint')"
+          :remove-label="t('files.remove')"
+        />
       </div>
       <Button :label="t('submissions.file')" icon="pi pi-send" class="trab-btn" :disabled="!canFile" :loading="filing" @click="submit" />
     </div>

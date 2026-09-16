@@ -9,6 +9,7 @@ import { TraApi, TRA_DOCUMENT_TYPES, MAX_UPLOAD_BYTES, ALLOWED_UPLOAD_EXTENSIONS
 import { apiErrorMessage, formatDate, humanize } from '@/utils/format.js';
 import { fileIcon, formatBytes, useStoredFile } from '@/utils/tra/files.js';
 import SectionError from './SectionError.vue';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   appealId: { type: String, required: true },
@@ -27,7 +28,6 @@ const remarks = ref('');
 const file = ref(null);
 const fileError = ref('');
 const uploading = ref(false);
-const fileInput = ref(null);
 
 const docTypeOptions = computed(() => TRA_DOCUMENT_TYPES.map((t) => ({ value: t, label: humanize(t) })));
 
@@ -42,9 +42,8 @@ function validate(f) {
   return '';
 }
 
-const onPick = (e) => {
-  file.value = e.target.files?.[0] ?? null;
-  fileError.value = file.value ? validate(file.value) : '';
+const onFileSelect = (chosen) => {
+  fileError.value = chosen ? validate(chosen) : '';
 };
 
 const upload = async () => {
@@ -57,7 +56,6 @@ const upload = async () => {
     file.value = null;
     remarks.value = '';
     docType.value = 'EVIDENCE';
-    if (fileInput.value) fileInput.value.value = '';
     emit('uploaded');
   } catch (e) {
     toast.add({
@@ -91,17 +89,13 @@ const upload = async () => {
         </div>
         <div class="upload-field">
           <label for="doc-file">File <span class="req" aria-hidden="true">*</span></label>
-          <input
-            id="doc-file"
-            ref="fileInput"
-            type="file"
-            class="fld-file"
-            :accept="ALLOWED_UPLOAD_EXTENSIONS.join(',')"
-            :disabled="uploading"
-            :aria-invalid="!!fileError"
-            aria-describedby="doc-file-help"
-            required
-            @change="onPick"
+          <FilePicker
+            v-model="file"
+            input-id="tra-doc-file"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            label="Choose a document"
+            hint="PDF, image or Word up to 10 MB"
+            @change="onFileSelect"
           />
           <div id="doc-file-help" class="help" :class="{ bad: fileError }" :role="fileError ? 'alert' : undefined">
             {{ fileError || 'PDF, JPG, PNG or Word — max 10 MB' }}

@@ -12,6 +12,7 @@ import Select from 'primevue/select';
 import { SelfServiceDocuments } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -80,18 +81,15 @@ watch(
   { immediate: true },
 );
 
-const onFileSelect = (event) => {
-  const selected = event.target.files?.[0] || null;
+const onFileSelect = (selected) => {
   file.value = null;
   if (!selected) return;
   if (!ALLOWED_EXTENSIONS.includes(extensionOf(selected.name))) {
     toast.add({ severity: 'warn', summary: t('common.validation'), detail: t('documents.badType'), life: 4000 });
-    event.target.value = '';
     return;
   }
   if (selected.size > MAX_SIZE) {
     toast.add({ severity: 'warn', summary: t('common.validation'), detail: t('documents.tooLarge'), life: 4000 });
-    event.target.value = '';
     return;
   }
   file.value = selected;
@@ -185,12 +183,13 @@ watch(previewVisible, (open) => {
           </div>
           <div class="sm:col-span-2">
             <label class="field-label" for="doc-file">{{ t('fields.file') }}</label>
-            <input
-              id="doc-file"
-              ref="fileInput"
-              type="file"
+            <FilePicker
+              v-model="file"
+              input-id="doc-file"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              class="file-input"
+              :label="t('files.choose')"
+              :hint="t('files.hintAny')"
+              :remove-label="t('files.remove')"
               @change="onFileSelect"
             />
             <small class="field-hint">{{ t('documents.allowed') }}</small>

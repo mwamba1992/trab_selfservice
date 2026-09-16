@@ -13,8 +13,10 @@ vi.mock('@/service/TraApi.js', async (importOriginal) => {
 import { TraApi } from '@/service/TraApi.js';
 import DocumentsPanel from './DocumentsPanel.vue';
 
+// The picker hides the input behind its own control; the input is still what
+// the browser fires, so the test drives it the same way a user's choice does.
 const pick = async (wrapper, file) => {
-  const input = wrapper.find('#doc-file');
+  const input = wrapper.find('#tra-doc-file');
   Object.defineProperty(input.element, 'files', { value: [file], configurable: true });
   await input.trigger('change');
 };

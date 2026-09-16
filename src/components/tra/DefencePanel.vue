@@ -9,6 +9,7 @@ import { apiErrorMessage, formatDateTime } from '@/utils/format.js';
 import { fileIcon, useStoredFile } from '@/utils/tra/files.js';
 import DeadlineBanner from './DeadlineBanner.vue';
 import SectionError from './SectionError.vue';
+import FilePicker from '@/components/FilePicker.vue';
 
 const props = defineProps({
   appeal: { type: Object, required: true },
@@ -22,15 +23,10 @@ const toast = useToast();
 const { busy, openFile } = useStoredFile();
 const replyBody = ref('');
 const attachment = ref(null);
-const fileInput = ref(null);
 const filing = ref(false);
 
 // The defence may be typed, attached, or both.
 const canSubmit = computed(() => !!replyBody.value.trim() || !!attachment.value);
-
-const onPick = (event) => {
-  attachment.value = event.target.files?.[0] ?? null;
-};
 
 const submitReply = async () => {
   if (!canSubmit.value) return;
@@ -39,7 +35,6 @@ const submitReply = async () => {
     await TraApi.fileReply(props.appeal.id, replyBody.value, attachment.value);
     replyBody.value = '';
     attachment.value = null;
-    if (fileInput.value) fileInput.value.value = '';
     toast.add({ severity: 'success', summary: 'Filed', detail: 'Statement of defence filed', life: 3000 });
     emit('filed');
   } catch (e) {
@@ -67,7 +62,14 @@ const submitReply = async () => {
       />
       <div class="attach-row">
         <label for="reply-file" class="fld-label">Attach the defence (optional)</label>
-        <input id="reply-file" ref="fileInput" type="file" accept=".pdf,.doc,.docx" :disabled="filing" @change="onPick" />
+        <FilePicker
+          v-model="attachment"
+          input-id="reply-file"
+          accept=".pdf,.doc,.docx"
+          label="Choose a document"
+          hint="PDF or Word, or drop it here"
+          :disabled="filing"
+        />
       </div>
       <div class="actions">
         <Button

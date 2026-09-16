@@ -417,6 +417,21 @@ export default {
     openFailed: 'The copy could not be opened',
     notIssued: 'Not issued by the Board yet',
   },
+  replies: {
+    title: 'Replies',
+    intro: 'TRA files its statement of defence here, and you answer it. A reply may be typed, attached, or both.',
+    byAppellant: 'Your reply',
+    byRespondent: 'TRA — statement of defence',
+    empty: 'Nothing has been filed on this appeal yet',
+    waitingForDefence: 'You can reply once TRA has filed its statement of defence.',
+    fileTitle: 'Reply to the defence',
+    bodyLabel: 'Your reply',
+    bodyPlaceholder: 'Answer the points raised in the defence, or leave blank and attach your reply',
+    fileLabel: 'Attach a document (optional)',
+    file: 'File reply',
+    filed: 'Your reply has been filed',
+    attachment: 'Attachment',
+  },
   submissions: {
     title: 'Written submissions',
     intro:
@@ -474,6 +489,8 @@ export default {
     noPreview: 'This file type cannot be previewed. Use Download instead.',
     annexureFee: 'Each annexure carries a fee, added to your bill when the registry accepts the filing.',
     attachNow: 'Filed. Attach your annexures now — you can keep adding them until the registry checks your filing.',
+    uploadedCharged: 'Document added. Pay control number {control} for it.',
+    noCharge: 'No charge',
   },
   bills: {
     title: 'My Bills',

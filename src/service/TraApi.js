@@ -78,8 +78,17 @@ export const TraApi = {
   async replies(id) {
     return data(await api.get(`/tra/appeals/${id}/reply`));
   },
-  async fileReply(id, body) {
-    return data(await api.post(`/tra/appeals/${id}/reply`, { body }));
+  /** The defence may be typed, attached, or both. */
+  async fileReply(id, body, file) {
+    const formData = new FormData();
+    if (body?.trim()) formData.append('body', body.trim());
+    if (file) formData.append('file', file);
+    return data(
+      await api.post(`/tra/appeals/${id}/reply`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+      }),
+    );
   },
   async filings(id) {
     return data(await api.get(`/tra/appeals/${id}/filings`));

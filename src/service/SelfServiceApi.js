@@ -141,6 +141,21 @@ export const SelfServiceAppeals = {
       }),
     );
   },
+  /** Both sides' replies: TRA's statement of defence and the appellant's answer. */
+  async getReplies(appealId) {
+    return data(await api.get(`/self-service/appeals/${appealId}/replies`));
+  },
+  async fileReply(appealId, { body, file }) {
+    const formData = new FormData();
+    if (body) formData.append('body', body);
+    if (file) formData.append('file', file);
+    return data(
+      await api.post(`/self-service/appeals/${appealId}/replies`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+      }),
+    );
+  },
   ...documentsApi('/self-service/appeals'),
 };
 

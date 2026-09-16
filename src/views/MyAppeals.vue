@@ -12,6 +12,7 @@ import Dialog from 'primevue/dialog';
 import DocumentsDialog from '@/components/DocumentsDialog.vue';
 import ResubmitDialog from '@/components/ResubmitDialog.vue';
 import SubmissionsDialog from '@/components/SubmissionsDialog.vue';
+import RepliesDialog from '@/components/RepliesDialog.vue';
 import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
@@ -86,6 +87,14 @@ const submissionsAppeal = ref(null);
 const openSubmissions = (appeal) => {
   submissionsAppeal.value = appeal;
   submissionsVisible.value = true;
+};
+
+// TRA's statement of defence and the appellant's answer to it.
+const repliesVisible = ref(false);
+const repliesAppeal = ref(null);
+const openReplies = (appeal) => {
+  repliesAppeal.value = appeal;
+  repliesVisible.value = true;
 };
 
 // Correcting what the registry sent back.
@@ -207,6 +216,15 @@ const openCorrect = (appeal) => {
                 @click="openDocuments(data)"
               />
               <Button
+                v-tooltip.top="t('replies.title')"
+                icon="pi pi-comments"
+                text
+                rounded
+                size="small"
+                :aria-label="t('replies.title')"
+                @click="openReplies(data)"
+              />
+              <Button
                 v-tooltip.top="t('submissions.title')"
                 icon="pi pi-file-edit"
                 text
@@ -322,6 +340,8 @@ const openCorrect = (appeal) => {
     />
 
     <SubmissionsDialog v-model:visible="submissionsVisible" :appeal="submissionsAppeal" />
+
+    <RepliesDialog v-model:visible="repliesVisible" :appeal="repliesAppeal" />
 
     <ResubmitDialog v-model:visible="correctVisible" kind="appeal" :record="correctData" :api="AppealService" @resubmitted="refresh" />
   </div>

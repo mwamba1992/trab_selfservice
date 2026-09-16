@@ -423,6 +423,21 @@ export default {
     openFailed: 'Nakala imeshindwa kufunguka',
     notIssued: 'Bado haijatolewa na Bodi',
   },
+  replies: {
+    title: 'Majibu',
+    intro: 'TRA huwasilisha majibu yake ya utetezi hapa, nawe unayajibu. Jibu linaweza kuandikwa, kuambatishwa, au vyote viwili.',
+    byAppellant: 'Jibu lako',
+    byRespondent: 'TRA — majibu ya utetezi',
+    empty: 'Bado hakuna kilichowasilishwa kwenye rufaa hii',
+    waitingForDefence: 'Utaweza kujibu baada ya TRA kuwasilisha majibu yake ya utetezi.',
+    fileTitle: 'Jibu majibu ya utetezi',
+    bodyLabel: 'Jibu lako',
+    bodyPlaceholder: 'Jibu hoja zilizotolewa katika utetezi, au acha wazi na uambatishe jibu lako',
+    fileLabel: 'Ambatisha nyaraka (si lazima)',
+    file: 'Wasilisha jibu',
+    filed: 'Jibu lako limewasilishwa',
+    attachment: 'Kiambatisho',
+  },
   submissions: {
     title: 'Hoja za maandishi',
     intro:
@@ -481,6 +496,8 @@ export default {
     annexureFee: 'Kila kiambatisho kina ada, itakayoongezwa kwenye bili yako pale msajili atakapokubali uwasilishaji.',
     attachNow:
       'Imewasilishwa. Ambatisha viambatisho vyako sasa — unaweza kuendelea kuviongeza hadi msajili atakapohakiki uwasilishaji wako.',
+    uploadedCharged: 'Nyaraka imeongezwa. Lipa namba ya malipo {control} kwa ajili yake.',
+    noCharge: 'Hakuna malipo',
   },
   bills: {
     title: 'Bili Zangu',

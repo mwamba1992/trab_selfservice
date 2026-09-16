@@ -10,6 +10,7 @@ import Textarea from 'primevue/textarea';
 import Skeleton from 'primevue/skeleton';
 import { SelfServiceAppeals } from '@/service/SelfServiceApi.js';
 import { Config } from '@/utils/Config.js';
+import { openPreview } from '@/utils/preview.js';
 import { apiErrorMessage } from '@/utils/format.js';
 import { SUBMISSION_STAGES, nextStage, stageKey, windowState } from '@/utils/submissions.js';
 
@@ -78,7 +79,18 @@ const submit = async () => {
   }
 };
 
-const fileUrl = (name) => `${Config.API_BASE_URL}/files/${name}`;
+// Attachments open in the preview window; the reader downloads from there.
+const preview = (item) =>
+  openPreview({
+    fileName: item.originalName || item.fileName,
+    title: item.originalName || 'Document',
+    downloadName: item.originalName,
+    load: async () => {
+      const res = await fetch(`${Config.API_BASE_URL}/files/${item.fileName}`);
+      if (!res.ok) throw new Error('The document could not be opened');
+      return res.blob();
+    },
+  });
 const partyLabel = (party) => (party === 'APPELLANT' ? t('submissions.byAppellant') : t('submissions.byRespondent'));
 </script>
 
@@ -139,9 +151,9 @@ const partyLabel = (party) => (party === 'APPELLANT' ? t('submissions.byAppellan
           <div class="meta">{{ s.filedByName || t('common.dash') }} · {{ String(s.createdAt).slice(0, 10) }}</div>
           <p v-if="s.body" class="body">{{ s.body }}</p>
         </div>
-        <a v-if="s.fileName" :href="fileUrl(s.fileName)" target="_blank" rel="noopener" class="attach">
+        <button v-if="s.fileName" type="button" class="attach" @click="preview(s)">
           <i class="pi pi-paperclip"></i> {{ s.originalName || t('submissions.attachment') }}
-        </a>
+        </button>
       </li>
     </ul>
     <div v-else class="empty-state">
@@ -245,10 +257,15 @@ const partyLabel = (party) => (party === 'APPELLANT' ? t('submissions.byAppellan
 .attach {
   font-size: 0.78rem;
   color: #1b6b3d;
-  text-decoration: none;
   white-space: nowrap;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-family: inherit;
 }
 .attach:hover {
-  text-decoration: underline;
+  background: #f6f7f9;
 }
 </style>

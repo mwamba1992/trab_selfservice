@@ -1,60 +1,14 @@
-import { reactive, ref } from 'vue';
+import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { TraApi } from '@/service/TraApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import { mimeFor, openPreview } from '@/utils/preview.js';
 
 // Stored uploads sit behind a JWT-guarded route, so files are fetched with the
 // token and handed to the browser as blobs rather than linked directly.
 
-/** One preview window for the whole desk, mounted once in the layout. */
-export const previewState = reactive({ request: null });
-
-export function openPreview(request) {
-  previewState.request = { ...request };
-}
-
-export function closePreview() {
-  previewState.request = null;
-}
-
-const MIME_TYPES = {
-  pdf: 'application/pdf',
-  png: 'image/png',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  doc: 'application/msword',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-};
-
-const extensionOf = (fileName) => (String(fileName).includes('.') ? String(fileName).split('.').pop().toLowerCase() : '');
-
-/** Content type from the file name; the download route labels every file generically. */
-export function mimeFor(fileName) {
-  return MIME_TYPES[extensionOf(fileName)] ?? 'application/octet-stream';
-}
-
-export function previewKind(fileName) {
-  const ext = extensionOf(fileName);
-  if (ext === 'pdf') return 'pdf';
-  if (['png', 'jpg', 'jpeg'].includes(ext)) return 'image';
-  return 'other';
-}
-
-export function fileIcon(name) {
-  const ext = extensionOf(name ?? '');
-  if (ext === 'pdf') return 'pi-file-pdf';
-  if (ext === 'doc' || ext === 'docx') return 'pi-file-word';
-  if (['jpg', 'jpeg', 'png'].includes(ext)) return 'pi-image';
-  return 'pi-file';
-}
-
-export function formatBytes(size) {
-  const n = Number(size);
-  if (!Number.isFinite(n) || n <= 0) return '-';
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-}
+// The preview window itself is shared with the appellant side of the portal.
+export { closePreview, fileIcon, formatBytes, mimeFor, openPreview, previewKind, previewState } from '@/utils/preview.js';
 
 /** Opens a stored upload in the preview window, or downloads it through the token. */
 export function useStoredFile() {

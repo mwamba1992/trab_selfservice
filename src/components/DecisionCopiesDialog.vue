@@ -8,6 +8,7 @@ import Tag from 'primevue/tag';
 import Skeleton from 'primevue/skeleton';
 import { SelfServiceAppeals, SelfServiceDecisions, SelfServiceDocuments } from '@/service/SelfServiceApi.js';
 import { apiErrorMessage, formatMoney } from '@/utils/format.js';
+import { openPreview } from '@/utils/preview.js';
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -57,21 +58,16 @@ const request = async (copy) => {
   }
 };
 
-const open = async (copy) => {
-  busyType.value = copy.documentType;
-  try {
+// The copy opens in the preview window; it is downloaded or printed from there.
+const open = (copy) => {
+  const appealId = props.decision.id;
+  openPreview({
+    fileName: `${copy.label}.pdf`,
+    title: copy.label,
+    downloadName: `${copy.label}.pdf`,
     // The judgement lives on the appeal itself unless it was uploaded as a document.
-    const blob = copy.documentId
-      ? await SelfServiceDocuments.download(copy.documentId)
-      : await SelfServiceDecisions.downloadJudgement(props.decision.id);
-    const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-    window.open(url, '_blank', 'noopener');
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('copies.openFailed')), life: 5000 });
-  } finally {
-    busyType.value = '';
-  }
+    load: () => (copy.documentId ? SelfServiceDocuments.download(copy.documentId) : SelfServiceDecisions.downloadJudgement(appealId)),
+  });
 };
 </script>
 

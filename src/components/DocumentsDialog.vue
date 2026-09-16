@@ -101,8 +101,18 @@ const upload = async () => {
   if (!file.value) return;
   uploading.value = true;
   try {
-    await props.api.uploadDocument(props.sourceId, file.value, docType.value, remarks.value.trim());
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('documents.uploaded'), life: 3000 });
+    const saved = await props.api.uploadDocument(props.sourceId, file.value, docType.value, remarks.value.trim());
+    // A document added after filing is charged; the control number comes back with it.
+    toast.add(
+      saved?.controlNumber
+        ? {
+            severity: 'success',
+            summary: t('common.success'),
+            detail: t('documents.uploadedCharged', { control: saved.controlNumber }),
+            life: 8000,
+          }
+        : { severity: 'success', summary: t('common.success'), detail: t('documents.uploaded'), life: 3000 },
+    );
     resetForm();
     await load();
   } catch (err) {
@@ -211,6 +221,12 @@ watch(previewVisible, (open) => {
         <Column :header="t('fields.size')"
           ><template #body="{ data }">{{ (Number(data.fileSize) / 1024).toFixed(1) }} KB</template></Column
         >
+        <Column :header="t('fields.payment')">
+          <template #body="{ data }">
+            <span v-if="!data.controlNumber" class="free">{{ t('documents.noCharge') }}</span>
+            <span v-else class="control">{{ data.controlNumber }}</span>
+          </template>
+        </Column>
         <Column class="w-16">
           <template #body="{ data }">
             <Button
@@ -255,6 +271,15 @@ watch(previewVisible, (open) => {
 </template>
 
 <style scoped>
+.free {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+.control {
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 .upload-box {
   background: var(--trab-soft-bg);
   border-radius: 8px;

@@ -1,10 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
+import Tag from 'primevue/tag';
 import { TraApi } from '@/service/TraApi.js';
 import { apiErrorMessage, formatDateTime } from '@/utils/format.js';
+import { fileIcon, useStoredFile } from '@/utils/tra/files.js';
 import DeadlineBanner from './DeadlineBanner.vue';
 import SectionError from './SectionError.vue';
 
@@ -17,15 +19,27 @@ const props = defineProps({
 const emit = defineEmits(['filed', 'retry']);
 
 const toast = useToast();
+const { busy, openFile } = useStoredFile();
 const replyBody = ref('');
+const attachment = ref(null);
+const fileInput = ref(null);
 const filing = ref(false);
 
+// The defence may be typed, attached, or both.
+const canSubmit = computed(() => !!replyBody.value.trim() || !!attachment.value);
+
+const onPick = (event) => {
+  attachment.value = event.target.files?.[0] ?? null;
+};
+
 const submitReply = async () => {
-  if (!replyBody.value.trim()) return;
+  if (!canSubmit.value) return;
   filing.value = true;
   try {
-    await TraApi.fileReply(props.appeal.id, replyBody.value);
+    await TraApi.fileReply(props.appeal.id, replyBody.value, attachment.value);
     replyBody.value = '';
+    attachment.value = null;
+    if (fileInput.value) fileInput.value.value = '';
     toast.add({ severity: 'success', summary: 'Filed', detail: 'Statement of defence filed', life: 3000 });
     emit('filed');
   } catch (e) {
@@ -51,27 +65,48 @@ const submitReply = async () => {
         placeholder="State TRA's grounds of opposition to this appeal…"
         :disabled="filing"
       />
+      <div class="attach-row">
+        <label for="reply-file" class="fld-label">Attach the defence (optional)</label>
+        <input id="reply-file" ref="fileInput" type="file" accept=".pdf,.doc,.docx" :disabled="filing" @change="onPick" />
+      </div>
       <div class="actions">
         <Button
           label="File Defence"
           icon="pi pi-send"
           class="trab-btn"
           :loading="filing"
-          :disabled="filing || !replyBody.trim()"
+          :disabled="filing || !canSubmit"
           @click="submitReply"
         />
       </div>
     </div>
 
-    <h2 class="sec-head">Filed Replies</h2>
+    <h2 class="sec-head">Replies on this appeal</h2>
     <SectionError v-if="error" :message="error" @retry="emit('retry')" />
     <template v-else>
-      <article v-for="r in replies" :key="r.id" class="reply-card">
+      <article v-for="r in replies" :key="r.id" class="reply-card" :class="r.party === 'APPELLANT' ? 'from-appellant' : 'from-tra'">
         <div class="card-head">
-          <strong class="who">{{ r.filedByName || 'TRA Officer' }}</strong>
+          <strong class="who">
+            {{ r.filedByName || 'TRA Officer' }}
+            <Tag
+              :value="r.party === 'APPELLANT' ? 'Appellant' : 'TRA'"
+              :severity="r.party === 'APPELLANT' ? 'success' : 'info'"
+              class="ml-2"
+            />
+          </strong>
           <span class="when">{{ formatDateTime(r.createdAt) }}</span>
         </div>
-        <p class="body">{{ r.body }}</p>
+        <p v-if="r.body" class="body">{{ r.body }}</p>
+        <button
+          v-if="r.fileName"
+          type="button"
+          class="attach"
+          :disabled="busy === `download:${r.fileName}`"
+          @click="openFile(r.fileName, 'view', r.originalName)"
+        >
+          <i class="pi" :class="fileIcon(r.originalName)"></i>
+          {{ r.originalName || 'Attachment' }}
+        </button>
       </article>
       <div v-if="!replies.length" class="empty-state">
         <i class="pi pi-pencil" aria-hidden="true"></i>
@@ -82,6 +117,34 @@ const submitReply = async () => {
 </template>
 
 <style scoped>
+.attach-row {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+.reply-card.from-appellant {
+  border-left: 3px solid var(--trab-primary);
+}
+.reply-card.from-tra {
+  border-left: 3px solid #3b82f6;
+}
+.attach {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: var(--trab-primary);
+  background: none;
+  border: 1px solid var(--trab-border);
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.attach:hover {
+  background: #f6f7f9;
+}
 .filing-form {
   margin-bottom: 1.25rem;
 }

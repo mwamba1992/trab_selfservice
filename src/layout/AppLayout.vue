@@ -4,7 +4,7 @@ import AppTopbar from './AppTopbar.vue';
 import AppFooter from './AppFooter.vue';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
-import FilePreviewDialog from '@/components/tra/FilePreviewDialog.vue';
+import FilePreviewDialog from '@/components/FilePreviewDialog.vue';
 
 const { t } = useI18n();
 </script>

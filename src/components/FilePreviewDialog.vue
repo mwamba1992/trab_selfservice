@@ -4,7 +4,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { TraApi } from '@/service/TraApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { closePreview, mimeFor, previewKind, previewState } from '@/utils/tra/files.js';
+import { closePreview, mimeFor, previewKind, previewState } from '@/utils/preview.js';
 
 const url = ref('');
 const loading = ref(false);
@@ -34,8 +34,9 @@ const load = async () => {
   error.value = '';
   loading.value = true;
   try {
-    // The uploads route needs the officer's token, so the file is fetched rather than linked.
-    const blob = await TraApi.fileBlob(req.fileName);
+    // Fetched rather than linked: the routes that serve a document need the
+    // caller's token, and a PDF must be retyped before a browser will show it.
+    const blob = req.load ? await req.load() : await TraApi.fileBlob(req.fileName);
     if (seq !== requestSeq) return;
     // Retyped from the file name: served generically, a PDF would download instead of displaying.
     url.value = URL.createObjectURL(new Blob([blob], { type: mimeFor(req.fileName) }));

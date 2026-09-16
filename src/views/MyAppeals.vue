@@ -10,6 +10,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import DocumentsDialog from '@/components/DocumentsDialog.vue';
+import ResubmitDialog from '@/components/ResubmitDialog.vue';
 import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
@@ -30,6 +31,7 @@ const {
   stats,
   onPage,
   onSearch,
+  refresh,
 } = usePagedList(AppealService.getAll, {
   errorKey: 'appeals.loadFailed',
   statsKey: 'appeals',
@@ -76,6 +78,14 @@ onMounted(() => {
 
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
 const returned = computed(() => returnedFilings(appeals.value));
+
+// Correcting what the registry sent back.
+const correctVisible = ref(false);
+const correctData = ref(null);
+const openCorrect = (appeal) => {
+  correctData.value = appeal;
+  correctVisible.value = true;
+};
 </script>
 
 <template>
@@ -187,6 +197,17 @@ const returned = computed(() => returnedFilings(appeals.value));
                 :aria-label="t('appeals.documents')"
                 @click="openDocuments(data)"
               />
+              <Button
+                v-if="data.filingStatus === 'RETURNED'"
+                v-tooltip.top="t('filingStatus.correctTitle')"
+                icon="pi pi-pencil"
+                text
+                rounded
+                size="small"
+                severity="danger"
+                :aria-label="t('filingStatus.correctTitle')"
+                @click="openCorrect(data)"
+              />
             </div>
           </template>
         </Column>
@@ -281,6 +302,8 @@ const returned = computed(() => returnedFilings(appeals.value));
       charges-annextures
       :reference="docsAppeal?.appealNo || docsAppeal?.appellantName || ''"
     />
+
+    <ResubmitDialog v-model:visible="correctVisible" kind="appeal" :record="correctData" :api="AppealService" @resubmitted="refresh" />
   </div>
 </template>
 

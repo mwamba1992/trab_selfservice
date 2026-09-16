@@ -10,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import QRCode from 'qrcode';
 import BillDocument from '@/components/bills/BillDocument.vue';
+import ResubmitDialog from '@/components/ResubmitDialog.vue';
 import { SelfServiceNotices as NoticeService, SelfServiceBills as BillingService } from '@/service/SelfServiceApi.js';
 import { printElement } from '@/utils/print.js';
 import { useLabels } from '@/composables/useLabels.js';
@@ -32,6 +33,7 @@ const {
   stats,
   onPage,
   onSearch,
+  refresh,
 } = usePagedList(NoticeService.getAll, {
   errorKey: 'notices.loadFailed',
   statsKey: 'notices',
@@ -78,6 +80,14 @@ const openBill = async (notice) => {
 };
 
 const printBill = () => printElement(billDocument.value?.$el, `Bill - ${billData.value?.billReference || ''}`);
+
+// Correcting what the registry sent back.
+const correctVisible = ref(false);
+const correctData = ref(null);
+const openCorrect = (notice) => {
+  correctData.value = notice;
+  correctVisible.value = true;
+};
 
 // Mirrors the backend rule: a notice supports an appeal for 45 days unless exempted
 const isValid = (notice) => notice.isExempted || (daysSince(notice.loggedAt) ?? 0) <= 45;
@@ -189,6 +199,17 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
                 :loading="openingId === data.id"
                 :aria-label="t('notices.viewDetails')"
                 @click="openView(data)"
+              />
+              <Button
+                v-if="data.filingStatus === 'RETURNED'"
+                v-tooltip.top="t('filingStatus.correctTitle')"
+                icon="pi pi-pencil"
+                text
+                rounded
+                size="small"
+                severity="danger"
+                :aria-label="t('filingStatus.correctTitle')"
+                @click="openCorrect(data)"
               />
               <Button
                 v-if="data.billId || data.bill"
@@ -312,6 +333,8 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
         <Button :label="t('common.print')" icon="pi pi-print" class="trab-btn" @click="printBill" />
       </template>
     </Dialog>
+
+    <ResubmitDialog v-model:visible="correctVisible" kind="notice" :record="correctData" :api="NoticeService" @resubmitted="refresh" />
   </div>
 </template>
 

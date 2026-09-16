@@ -96,6 +96,10 @@ export const SelfServiceNotices = {
   async create(payload) {
     return data(await api.post('/self-service/notices', payload));
   },
+  /** Corrects a returned notice and sends it back to the registry. */
+  async resubmit(id, corrections) {
+    return data(await api.post(`/self-service/notices/${id}/resubmit`, corrections));
+  },
   ...documentsApi('/self-service/notices'),
 };
 
@@ -109,6 +113,10 @@ export const SelfServiceAppeals = {
   },
   async getParties(appealId) {
     return data(await api.get(`/self-service/appeals/${appealId}/parties`));
+  },
+  /** Corrects a returned statement of appeal and sends it back to the registry. */
+  async resubmit(id, corrections) {
+    return data(await api.post(`/self-service/appeals/${id}/resubmit`, corrections));
   },
   ...documentsApi('/self-service/appeals'),
 };

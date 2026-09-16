@@ -172,6 +172,13 @@ export default {
     alreadyRegistered: 'Umeshasajiliwa?',
     signInInstead: 'Ingia Badala Yake',
     verifyComplete: 'Thibitisha na Ukamilishe',
+    passwordTitle: 'Ingia kwa nenosiri',
+    passwordSubtitle: 'Kwa akaunti zilizokamilisha usajili',
+    passwordLabel: 'Nenosiri',
+    passwordHint: 'Tumia barua pepe uliyosajili nayo akaunti yako',
+    passwordLink: 'Ingia kwa barua pepe na nenosiri',
+    passwordFailed: 'Kuingia kumeshindikana. Hakiki barua pepe na nenosiri.',
+    backToOtp: 'Ingia kwa namba ya simu badala yake',
   },
   landing: {
     heroTitle: 'Wasilisha Rufani Yako ya Kodi',

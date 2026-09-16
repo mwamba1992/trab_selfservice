@@ -170,6 +170,13 @@ export default {
     alreadyRegistered: 'Already registered?',
     signInInstead: 'Sign In Instead',
     verifyComplete: 'Verify & Complete',
+    passwordTitle: 'Sign in with password',
+    passwordSubtitle: 'For accounts that have completed enrolment',
+    passwordLabel: 'Password',
+    passwordHint: 'Use the email your account was enrolled with',
+    passwordLink: 'Sign in with email and password',
+    passwordFailed: 'Sign-in failed. Check the email and password.',
+    backToOtp: 'Sign in with a phone code instead',
   },
   landing: {
     heroTitle: 'File Your Tax Appeal',

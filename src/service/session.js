@@ -5,9 +5,15 @@ const KEYS = {
   userId: 'userId',
   userName: 'userName',
   userPhone: 'userPhone',
+  userType: 'userType',
+  permissions: 'permissions',
+  role: 'userRole',
   companyId: 'companyId',
   companyName: 'companyName',
 };
+
+/** The two audiences of the portal: the appellant side and the TRA desk. */
+export const AUDIENCES = { APPELLANT: 'APPELLANT', TRA: 'TRA' };
 
 const read = (key) => {
   try {
@@ -48,14 +54,32 @@ export const session = {
   getUserName: () => read(KEYS.userName) || '',
   getUserPhone: () => read(KEYS.userPhone) || '',
 
+  /** Which desk this session belongs to. Appellant unless a TRA officer signed in. */
+  getUserType: () => read(KEYS.userType) || AUDIENCES.APPELLANT,
+  isTra() {
+    return this.getUserType() === AUDIENCES.TRA;
+  },
+
+  /** TRA permissions from the login response; empty for appellants. */
+  getPermissions() {
+    try {
+      return JSON.parse(read(KEYS.permissions) || '[]');
+    } catch {
+      return [];
+    }
+  },
+
   setTokens({ accessToken, refreshToken }) {
     write(KEYS.access, accessToken);
     if (refreshToken) write(KEYS.refresh, refreshToken);
   },
 
   /** Stores the result of a successful sign-in or registration. */
-  start({ accessToken, refreshToken, user, company }) {
+  start({ accessToken, refreshToken, user, company }, userType = AUDIENCES.APPELLANT) {
     this.setTokens({ accessToken, refreshToken });
+    write(KEYS.userType, userType);
+    write(KEYS.permissions, JSON.stringify(user.permissions || []));
+    write(KEYS.role, user.role || '');
     write(KEYS.userId, user.id);
     this.setUserName(`${user.firstName || ''} ${user.lastName || ''}`);
     write(KEYS.userPhone, user.phone || '');
@@ -68,6 +92,11 @@ export const session = {
   setUserName(name) {
     write(KEYS.userName, name.trim());
   },
+
+  setRole(role) {
+    write(KEYS.role, role || '');
+  },
+  getRole: () => read(KEYS.role) || '',
 
   clear() {
     Object.values(KEYS).forEach((key) => write(key, null));

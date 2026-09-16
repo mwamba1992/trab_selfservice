@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import Drawer from 'primevue/drawer';
 import Menu from 'primevue/menu';
 import AuthService from '@/service/AuthService.js';
+import { session } from '@/service/session.js';
 import { profileStore } from '@/stores/profile.js';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 
@@ -15,7 +16,10 @@ const route = useRoute();
 const drawerOpen = ref(false);
 const userMenu = ref(null);
 
-const navItems = computed(() => [
+const isTra = computed(() => session.isTra());
+
+// The same shell serves both desks; only what hangs in the bar changes.
+const appellantNav = computed(() => [
   { to: '/dashboard', icon: 'pi pi-home', label: t('nav.dashboard') },
   { to: '/appellants', icon: 'pi pi-users', label: t('nav.appellants') },
   { to: '/notices', icon: 'pi pi-file', label: t('nav.notices') },
@@ -26,7 +30,14 @@ const navItems = computed(() => [
   { to: '/decisions', icon: 'pi pi-verified', label: t('nav.decisions') },
 ]);
 
+// TRA screens are English by policy, so these labels are not translated.
+const traNav = computed(() => [{ to: '/tra/dashboard', icon: 'pi pi-home', label: 'Dashboard' }]);
+
+const navItems = computed(() => (isTra.value ? traNav.value : appellantNav.value));
+const homePath = computed(() => (isTra.value ? '/tra/dashboard' : '/dashboard'));
+
 const userName = computed(() => {
+  if (isTra.value) return AuthService.getUserName() || t('common.user');
   const user = profileStore.state.profile?.user;
   const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : AuthService.getUserName();
   return name || t('common.user');
@@ -40,12 +51,16 @@ const logout = () => {
   router.push('/welcome');
 };
 
-const userMenuItems = computed(() => [
-  { label: t('nav.profile'), icon: 'pi pi-user', command: () => router.push('/profile') },
-  ...(profileStore.isCompanyAdmin ? [{ label: t('nav.staff'), icon: 'pi pi-users', command: () => router.push('/staff') }] : []),
-  { separator: true },
-  { label: t('common.signOut'), icon: 'pi pi-sign-out', command: logout },
-]);
+const userMenuItems = computed(() =>
+  isTra.value
+    ? [{ label: t('common.signOut'), icon: 'pi pi-sign-out', command: logout }]
+    : [
+        { label: t('nav.profile'), icon: 'pi pi-user', command: () => router.push('/profile') },
+        ...(profileStore.isCompanyAdmin ? [{ label: t('nav.staff'), icon: 'pi pi-users', command: () => router.push('/staff') }] : []),
+        { separator: true },
+        { label: t('common.signOut'), icon: 'pi pi-sign-out', command: logout },
+      ],
+);
 
 // Unread badge: refresh every minute while the tab is visible, and on navigation
 let pollTimer = null;
@@ -54,6 +69,8 @@ const refreshBadge = () => {
 };
 
 onMounted(() => {
+  // The profile and notification badge are appellant-side endpoints.
+  if (isTra.value) return;
   profileStore.load().catch(() => {
     /* profile page shows its own error */
   });
@@ -88,11 +105,11 @@ watch(
         <i class="pi pi-bars"></i>
       </button>
 
-      <router-link to="/dashboard" class="brand">
+      <router-link :to="homePath" class="brand">
         <img src="/coat-of-arms.svg" alt="" class="topbar-logo" />
         <div class="brand-text">
           <span class="topbar-name">{{ t('common.board') }}</span>
-          <span class="topbar-badge">{{ t('common.portal') }}</span>
+          <span class="topbar-badge">{{ isTra ? 'TRA Desk' : t('common.portal') }}</span>
         </div>
       </router-link>
 
@@ -103,9 +120,10 @@ watch(
       </nav>
 
       <div class="topbar-end">
-        <LanguageSwitcher class="hidden sm:inline-flex" />
+        <LanguageSwitcher v-if="!isTra" class="hidden sm:inline-flex" />
 
         <router-link
+          v-if="!isTra"
           v-tooltip.bottom="t('nav.notifications')"
           to="/notifications"
           class="icon-btn bell"
@@ -134,18 +152,20 @@ watch(
         <router-link v-for="item in navItems" :key="item.to" :to="item.to" class="drawer-link">
           <i :class="item.icon"></i> {{ item.label }}
         </router-link>
-        <router-link to="/notifications" class="drawer-link">
+        <router-link v-if="!isTra" to="/notifications" class="drawer-link">
           <i class="pi pi-bell"></i> {{ t('nav.notifications') }}
           <span v-if="unread > 0" class="badge inline">{{ unreadLabel }}</span>
         </router-link>
-        <router-link to="/profile" class="drawer-link"><i class="pi pi-id-card"></i> {{ t('nav.profile') }}</router-link>
-        <router-link v-if="profileStore.isCompanyAdmin" to="/staff" class="drawer-link"
+        <router-link v-if="!isTra" to="/profile" class="drawer-link"><i class="pi pi-id-card"></i> {{ t('nav.profile') }}</router-link>
+        <router-link v-if="!isTra && profileStore.isCompanyAdmin" to="/staff" class="drawer-link"
           ><i class="pi pi-sitemap"></i> {{ t('nav.staff') }}</router-link
         >
       </nav>
       <div class="drawer-footer">
-        <span class="drawer-label">{{ t('common.language') }}</span>
-        <LanguageSwitcher variant="full" />
+        <template v-if="!isTra">
+          <span class="drawer-label">{{ t('common.language') }}</span>
+          <LanguageSwitcher variant="full" />
+        </template>
         <button type="button" class="drawer-signout" @click="logout"><i class="pi pi-sign-out"></i> {{ t('common.signOut') }}</button>
       </div>
     </Drawer>

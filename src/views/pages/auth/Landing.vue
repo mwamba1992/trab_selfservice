@@ -8,6 +8,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import LoginDialog from '@/components/auth/LoginDialog.vue';
 import RegisterDialog from '@/components/auth/RegisterDialog.vue';
 import { safeRedirect } from '@/router/index.js';
+import { session } from '@/service/session.js';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -26,7 +27,7 @@ const openRegister = () => {
   showLogin.value = false;
   showRegister.value = true;
 };
-const goToApp = () => router.replace(safeRedirect(route.query.redirect));
+const goToApp = () => router.replace(safeRedirect(route.query.redirect, session.getUserType()));
 
 onMounted(() => {
   if (route.query.expired) {

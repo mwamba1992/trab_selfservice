@@ -1,8 +1,11 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
+import { setLocale } from '@/i18n/index.js';
 import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
 import Button from 'primevue/button';
 import AuthDialogShell from './AuthDialogShell.vue';
 import AuthService from '@/service/AuthService.js';
@@ -13,13 +16,18 @@ const props = defineProps({ visible: { type: Boolean, default: false } });
 const emit = defineEmits(['update:visible', 'signed-in', 'register']);
 
 const { t } = useI18n();
+const primevue = usePrimeVue();
 const toast = useToast();
 
 const step = ref('phone');
 const phone = ref('');
 const otp = ref('');
+const email = ref('');
+const password = ref('');
 const loading = ref(false);
 const error = ref('');
+
+const isPasswordStep = computed(() => step.value === 'password');
 
 watch(
   () => props.visible,
@@ -27,6 +35,7 @@ watch(
     if (open) {
       step.value = 'phone';
       otp.value = '';
+      password.value = '';
       error.value = '';
     }
   },
@@ -73,17 +82,75 @@ const changeNumber = () => {
   otp.value = '';
   error.value = '';
 };
+
+// One card, one portal: an enrolled account signs in with its password here,
+// whichever desk it belongs to.
+const openPassword = () => {
+  step.value = 'password';
+  error.value = '';
+  password.value = '';
+};
+
+const signInWithPassword = async () => {
+  error.value = '';
+  if (!email.value.trim() || !password.value) {
+    error.value = t('validation.required');
+    return;
+  }
+  loading.value = true;
+  try {
+    await AuthService.login(email.value.trim(), password.value);
+    // The TRA desk is English by policy.
+    if (AuthService.isTra()) setLocale('en', primevue);
+    password.value = '';
+    emit('update:visible', false);
+    emit('signed-in');
+  } catch (err) {
+    error.value = apiErrorMessage(err, t('auth.passwordFailed'));
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <template>
   <AuthDialogShell
     :visible="visible"
-    :title="t('auth.welcomeBack')"
-    :subtitle="t('auth.signInSubtitle')"
+    :title="isPasswordStep ? t('auth.passwordTitle') : t('auth.welcomeBack')"
+    :subtitle="isPasswordStep ? t('auth.passwordSubtitle') : t('auth.signInSubtitle')"
     :error="error"
     @update:visible="emit('update:visible', $event)"
   >
-    <form v-if="step === 'phone'" class="auth-form" novalidate @submit.prevent="requestOtp">
+    <form v-if="isPasswordStep" class="auth-form" novalidate @submit.prevent="signInWithPassword">
+      <div class="auth-field">
+        <label for="tra-email"><i class="pi pi-envelope"></i> {{ t('fields.email') }}</label>
+        <InputText
+          id="tra-email"
+          v-model="email"
+          type="email"
+          placeholder="officer@tra.go.tz"
+          class="w-full auth-input"
+          autocomplete="username"
+        />
+        <small>{{ t('auth.passwordHint') }}</small>
+      </div>
+      <div class="auth-field">
+        <label for="tra-password"><i class="pi pi-lock"></i> {{ t('auth.passwordLabel') }}</label>
+        <Password
+          id="tra-password"
+          v-model="password"
+          :feedback="false"
+          toggle-mask
+          input-class="w-full auth-input"
+          class="w-full"
+          autocomplete="current-password"
+        />
+      </div>
+      <Button type="submit" :label="t('auth.signIn')" :loading="loading" class="w-full auth-btn" icon="pi pi-sign-in" />
+      <button type="button" class="auth-link" @click="changeNumber"><i class="pi pi-arrow-left"></i> {{ t('auth.backToOtp') }}</button>
+    </form>
+
+    <form v-else-if="step === 'phone'" class="auth-form" novalidate @submit.prevent="requestOtp">
       <div class="auth-field">
         <label for="login-phone"><i class="pi pi-mobile"></i> {{ t('auth.phoneLabel') }}</label>
         <InputText
@@ -104,6 +171,7 @@ const changeNumber = () => {
       <button type="button" class="auth-secondary" @click="emit('register')">
         <i class="pi pi-building"></i> {{ t('auth.registerYourCompany') }}
       </button>
+      <button type="button" class="auth-link" @click="openPassword"><i class="pi pi-id-card"></i> {{ t('auth.passwordLink') }}</button>
     </form>
 
     <form v-else class="auth-form" novalidate @submit.prevent="verifyOtp">

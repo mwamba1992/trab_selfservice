@@ -1,5 +1,5 @@
 import api from './Api.js';
-import { session } from './session.js';
+import { AUDIENCES, session } from './session.js';
 import { clearDrafts } from '@/composables/useDraft.js';
 import { profileStore } from '@/stores/profile.js';
 
@@ -13,6 +13,17 @@ export default {
   async verifyOtp(phone, otp) {
     const result = data(await api.post('/auth/otp/verify', { phone, otp }));
     session.start(result);
+    return result.user;
+  },
+
+  /**
+   * Password sign-in for an enrolled account. Every user gets credentials once
+   * enrolment is complete; until appellant passwords are issued this reaches
+   * the TRA desk. The desk comes from the response, not from the form used.
+   */
+  async login(email, password) {
+    const result = data(await api.post('/auth/tra/login', { email, password }));
+    session.start(result, result.user.userType || AUDIENCES.TRA);
     return result.user;
   },
 
@@ -44,5 +55,19 @@ export default {
 
   getUserName() {
     return session.getUserName();
+  },
+
+  /** The desk this session belongs to, so the shell knows which portal to show. */
+  audience() {
+    return session.getUserType();
+  },
+
+  isTra() {
+    return session.isTra();
+  },
+
+  /** TRA permission check ('TRA Manage Users', 'TRA File Reply', …). */
+  can(permission) {
+    return session.getPermissions().includes(permission);
   },
 };

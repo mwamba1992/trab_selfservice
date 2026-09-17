@@ -2,6 +2,7 @@
 // confirm wording before go-live.
 export default {
   common: {
+    continue: 'Endelea',
     board: 'Bodi ya Rufani za Kodi',
     republic: 'Jamhuri ya Muungano wa Tanzania',
     portal: 'Mfumo wa Huduma Binafsi',
@@ -140,6 +141,13 @@ export default {
     expired: 'Muda wako wa kuingia umeisha. Ingia tena ili kuendelea — fomu ambazo hukumaliza zimehifadhiwa.',
   },
   auth: {
+    step: {
+      identity: 'Wewe ni nani',
+      details: 'Taarifa zako',
+      code: 'Thibitisha',
+    },
+    identityLede: 'Chagua unawasilisha kama nani, na toa namba unayotambulika nayo.',
+    detailsLede: 'Jinsi utakavyoingia, na jinsi Bodi itakavyokufikia.',
     checkTin: 'Hakiki',
     phoneForCode: 'Tunatuma namba yako ya kuingia kwenye namba hii.',
     passwordRule: 'Angalau herufi 8.',

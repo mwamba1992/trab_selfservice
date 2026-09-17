@@ -64,7 +64,7 @@ const steps = ['register', 'notice', 'pay', 'statement'];
         <div class="topbar-actions">
           <LanguageSwitcher />
           <button class="btn-signin" @click="openLogin"><i class="pi pi-sign-in"></i> {{ t('auth.signIn') }}</button>
-          <button class="btn-register" @click="openRegister"><i class="pi pi-user-plus"></i> {{ t('auth.registerCompany') }}</button>
+          <button class="btn-register" @click="openRegister"><i class="pi pi-user-plus"></i> {{ t('auth.createAccount') }}</button>
         </div>
       </div>
     </header>

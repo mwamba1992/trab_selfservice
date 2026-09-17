@@ -17,14 +17,45 @@ export default {
   },
 
   /**
-   * Password sign-in for an enrolled account. Every user gets credentials once
-   * enrolment is complete; until appellant passwords are issued this reaches
-   * the TRA desk. The desk comes from the response, not from the form used.
+   * Step one of signing in: the password. A portal account is then sent a code
+   * and finishes at completeLogin; the TRA desk signs in on the password
+   * alone, so one form serves both and the desk comes from the answer, not
+   * from the form used.
    */
-  async login(email, password) {
-    const result = data(await api.post('/auth/tra/login', { email, password }));
-    session.start(result, result.user.userType || AUDIENCES.TRA);
+  async startLogin(email, password) {
+    try {
+      const challenge = data(
+        await api.post('/auth/portal/login', { email, password }),
+      );
+      return { desk: 'portal', ...challenge };
+    } catch (err) {
+      const message = err?.response?.data?.message ?? '';
+      if (!/portal login only/i.test(String(message))) throw err;
+      const result = data(await api.post('/auth/tra/login', { email, password }));
+      session.start(result, result.user.userType || AUDIENCES.TRA);
+      return { desk: 'tra', user: result.user };
+    }
+  },
+
+  /** Step two: the code sent to the phone on the account. */
+  async completeLogin(challenge, otp) {
+    const result = data(await api.post('/auth/portal/verify', { challenge, otp }));
+    session.start(result);
     return result.user;
+  },
+
+  /** A new portal account: who you are, and how you will sign in. */
+  async register({ certificate, ...fields }) {
+    const form = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') form.append(key, value);
+    });
+    if (certificate) form.append('certificate', certificate);
+    return data(
+      await api.post('/auth/portal/register', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    );
   },
 
   async lookupTin(tin) {

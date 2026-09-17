@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePrimeVue } from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
@@ -10,7 +10,7 @@ import Button from 'primevue/button';
 import AuthDialogShell from './AuthDialogShell.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { isValidPhone, normalizePhone, isValidOtp } from '@/utils/validators.js';
+import { isValidOtp } from '@/utils/validators.js';
 
 const props = defineProps({ visible: { type: Boolean, default: false } });
 const emit = defineEmits(['update:visible', 'signed-in', 'register']);
@@ -19,47 +19,59 @@ const { t } = useI18n();
 const primevue = usePrimeVue();
 const toast = useToast();
 
-const step = ref('phone');
-const phone = ref('');
-const otp = ref('');
+// Signing in is the password, then the code sent to the phone on the account.
+// The TRA desk has no code step; startLogin says which desk answered.
+const step = ref('credentials');
 const email = ref('');
 const password = ref('');
+const otp = ref('');
+const challenge = ref('');
+const phoneHint = ref('');
 const loading = ref(false);
 const error = ref('');
-
-const isPasswordStep = computed(() => step.value === 'password');
 
 watch(
   () => props.visible,
   (open) => {
     if (open) {
-      step.value = 'phone';
-      otp.value = '';
+      step.value = 'credentials';
       password.value = '';
+      otp.value = '';
+      challenge.value = '';
       error.value = '';
     }
   },
 );
 
-const requestOtp = async () => {
+const signIn = async () => {
   error.value = '';
-  if (!isValidPhone(phone.value)) {
-    error.value = t('validation.phone');
+  if (!email.value.trim() || !password.value) {
+    error.value = t('validation.required');
     return;
   }
   loading.value = true;
   try {
-    await AuthService.requestOtp(normalizePhone(phone.value));
+    const started = await AuthService.startLogin(email.value.trim(), password.value);
+    password.value = '';
+    if (started.desk === 'tra') {
+      // The TRA desk is English by policy.
+      setLocale('en', primevue);
+      emit('update:visible', false);
+      emit('signed-in');
+      return;
+    }
+    challenge.value = started.challenge;
+    phoneHint.value = started.phoneHint;
     step.value = 'otp';
     toast.add({ severity: 'success', summary: t('auth.codeSentTitle'), detail: t('auth.codeSent'), life: 4000 });
   } catch (err) {
-    error.value = apiErrorMessage(err, t('auth.sendFailed'));
+    error.value = apiErrorMessage(err, t('auth.passwordFailed'));
   } finally {
     loading.value = false;
   }
 };
 
-const verifyOtp = async () => {
+const verifyCode = async () => {
   error.value = '';
   if (!isValidOtp(otp.value)) {
     error.value = t('validation.otp');
@@ -67,7 +79,7 @@ const verifyOtp = async () => {
   }
   loading.value = true;
   try {
-    await AuthService.verifyOtp(normalizePhone(phone.value), otp.value);
+    await AuthService.completeLogin(challenge.value, otp.value);
     emit('update:visible', false);
     emit('signed-in');
   } catch (err) {
@@ -77,67 +89,38 @@ const verifyOtp = async () => {
   }
 };
 
-const changeNumber = () => {
-  step.value = 'phone';
+const startAgain = () => {
+  step.value = 'credentials';
   otp.value = '';
+  challenge.value = '';
   error.value = '';
-};
-
-// One card, one portal: an enrolled account signs in with its password here,
-// whichever desk it belongs to.
-const openPassword = () => {
-  step.value = 'password';
-  error.value = '';
-  password.value = '';
-};
-
-const signInWithPassword = async () => {
-  error.value = '';
-  if (!email.value.trim() || !password.value) {
-    error.value = t('validation.required');
-    return;
-  }
-  loading.value = true;
-  try {
-    await AuthService.login(email.value.trim(), password.value);
-    // The TRA desk is English by policy.
-    if (AuthService.isTra()) setLocale('en', primevue);
-    password.value = '';
-    emit('update:visible', false);
-    emit('signed-in');
-  } catch (err) {
-    error.value = apiErrorMessage(err, t('auth.passwordFailed'));
-  } finally {
-    loading.value = false;
-  }
 };
 </script>
 
 <template>
   <AuthDialogShell
     :visible="visible"
-    :title="isPasswordStep ? t('auth.passwordTitle') : t('auth.welcomeBack')"
-    :subtitle="isPasswordStep ? t('auth.passwordSubtitle') : t('auth.signInSubtitle')"
+    :title="step === 'otp' ? t('auth.codeTitle') : t('auth.welcomeBack')"
+    :subtitle="step === 'otp' ? t('auth.codeSubtitle') : t('auth.signInSubtitle')"
     :error="error"
     @update:visible="emit('update:visible', $event)"
   >
-    <form v-if="isPasswordStep" class="auth-form" novalidate @submit.prevent="signInWithPassword">
+    <form v-if="step === 'credentials'" class="auth-form" novalidate @submit.prevent="signIn">
       <div class="auth-field">
-        <label for="tra-email"><i class="pi pi-envelope"></i> {{ t('fields.email') }}</label>
+        <label for="login-email"><i class="pi pi-envelope"></i> {{ t('fields.email') }}</label>
         <InputText
-          id="tra-email"
+          id="login-email"
           v-model="email"
           type="email"
-          placeholder="officer@tra.go.tz"
+          placeholder="you@example.co.tz"
           class="w-full auth-input"
           autocomplete="username"
         />
-        <small>{{ t('auth.passwordHint') }}</small>
       </div>
       <div class="auth-field">
-        <label for="tra-password"><i class="pi pi-lock"></i> {{ t('auth.passwordLabel') }}</label>
+        <label for="login-password"><i class="pi pi-lock"></i> {{ t('auth.passwordLabel') }}</label>
         <Password
-          id="tra-password"
+          id="login-password"
           v-model="password"
           :feedback="false"
           toggle-mask
@@ -147,37 +130,18 @@ const signInWithPassword = async () => {
         />
       </div>
       <Button type="submit" :label="t('auth.signIn')" :loading="loading" class="w-full auth-btn" icon="pi pi-sign-in" />
-      <button type="button" class="auth-link" @click="changeNumber"><i class="pi pi-arrow-left"></i> {{ t('auth.backToOtp') }}</button>
-    </form>
-
-    <form v-else-if="step === 'phone'" class="auth-form" novalidate @submit.prevent="requestOtp">
-      <div class="auth-field">
-        <label for="login-phone"><i class="pi pi-mobile"></i> {{ t('auth.phoneLabel') }}</label>
-        <InputText
-          id="login-phone"
-          v-model="phone"
-          placeholder="0712 345 678"
-          class="w-full auth-input"
-          maxlength="16"
-          inputmode="tel"
-          autocomplete="tel"
-        />
-        <small>{{ t('auth.phoneHint') }}</small>
-      </div>
-      <Button type="submit" :label="t('auth.sendCode')" :loading="loading" class="w-full auth-btn" icon="pi pi-send" />
       <div class="auth-divider">
         <span>{{ t('auth.newToTrab') }}</span>
       </div>
       <button type="button" class="auth-secondary" @click="emit('register')">
-        <i class="pi pi-building"></i> {{ t('auth.registerYourCompany') }}
+        <i class="pi pi-user-plus"></i> {{ t('auth.createAccount') }}
       </button>
-      <button type="button" class="auth-link" @click="openPassword"><i class="pi pi-id-card"></i> {{ t('auth.passwordLink') }}</button>
     </form>
 
-    <form v-else class="auth-form" novalidate @submit.prevent="verifyOtp">
+    <form v-else class="auth-form" novalidate @submit.prevent="verifyCode">
       <div class="otp-icon"><i class="pi pi-lock"></i></div>
       <p class="otp-info">
-        {{ t('auth.enterCode') }}<br /><strong>{{ phone }}</strong>
+        {{ t('auth.enterCode') }}<br /><strong>{{ phoneHint }}</strong>
       </p>
       <InputText
         v-model="otp"
@@ -189,9 +153,7 @@ const signInWithPassword = async () => {
         :aria-label="t('validation.otp')"
       />
       <Button type="submit" :label="t('auth.verifySignIn')" :loading="loading" class="w-full auth-btn" icon="pi pi-sign-in" />
-      <button type="button" class="auth-link" @click="changeNumber">
-        <i class="pi pi-arrow-left"></i> {{ t('auth.useDifferentNumber') }}
-      </button>
+      <button type="button" class="auth-link" @click="startAgain"><i class="pi pi-arrow-left"></i> {{ t('auth.startAgain') }}</button>
     </form>
   </AuthDialogShell>
 </template>

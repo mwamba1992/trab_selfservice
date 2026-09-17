@@ -1,89 +1,125 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Select from 'primevue/select';
 import Button from 'primevue/button';
 import AuthDialogShell from './AuthDialogShell.vue';
+import FilePicker from '@/components/FilePicker.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { isValidPhone, normalizePhone, isValidOtp, isValidTin } from '@/utils/validators.js';
+import { isValidEmail, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
 
+/**
+ * A new portal account. The Board accepts filings from people it can identify,
+ * so what you are — and the number that proves it — is settled here, with the
+ * email and password you will sign in with afterwards.
+ */
 const props = defineProps({ visible: { type: Boolean, default: false } });
 const emit = defineEmits(['update:visible', 'registered', 'sign-in']);
 
 const { t } = useI18n();
+const toast = useToast();
 
-const step = ref(1); // 1 = TIN + admin details, 2 = verification code
+const KINDS = ['ORGANISATION', 'INDIVIDUAL', 'ADVOCATE', 'TAX_CONSULTANT'];
+/** The two who act for other people must show the Board their standing. */
+const NEEDS_CERTIFICATE = ['ADVOCATE', 'TAX_CONSULTANT'];
+
+const step = ref('details');
 const loading = ref(false);
-const verifying = ref(false);
 const error = ref('');
-const tin = ref('');
-const company = ref(null);
-const adminName = ref('');
-const adminPhone = ref('');
-const companyId = ref('');
 const otp = ref('');
+const challenge = ref('');
+const phoneHint = ref('');
+const lookingUp = ref(false);
+const tinName = ref('');
+
+const form = ref({
+  kind: 'ORGANISATION',
+  idNumber: '',
+  registeredName: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  password: '',
+  certificate: null,
+});
+
+const kindOptions = computed(() => KINDS.map((kind) => ({ value: kind, label: t(`filer.kinds.${kind}`) })));
+const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
+const needsCertificate = computed(() => NEEDS_CERTIFICATE.includes(form.value.kind));
+const isCompany = computed(() => form.value.kind === 'ORGANISATION');
 
 watch(
   () => props.visible,
   (open) => {
-    if (!open) return;
-    step.value = 1;
-    error.value = '';
-    tin.value = '';
-    company.value = null;
-    adminName.value = '';
-    adminPhone.value = '';
-    otp.value = '';
+    if (open) {
+      step.value = 'details';
+      error.value = '';
+      otp.value = '';
+      tinName.value = '';
+      form.value = { ...form.value, idNumber: '', password: '', certificate: null };
+    }
   },
 );
 
-const verifyTin = async () => {
+/** A company's TIN is settled by TRA, so its name is fetched, not typed. */
+const lookupTin = async () => {
   error.value = '';
-  if (!isValidTin(tin.value)) {
+  if (!isValidTin(form.value.idNumber)) {
     error.value = t('validation.tin');
     return;
   }
-  verifying.value = true;
+  lookingUp.value = true;
   try {
-    const res = await AuthService.lookupTin(tin.value.replace(/[\s-]/g, ''));
-    if (!res.status || !res.data) {
-      error.value = res.description || t('auth.tinNotFound');
+    const res = await AuthService.lookupTin(form.value.idNumber.replace(/[\s-]/g, ''));
+    if (!res?.status) {
+      error.value = res?.description || t('auth.tinNotFound');
       return;
     }
-    const d = res.data;
-    company.value = {
-      name: d.CompanyName,
-      business: d.BusinessType || '',
-      vat: d.Vrn || '',
-      address: [d.Region, d.District].filter(Boolean).join(', '),
-    };
+    tinName.value = res.data?.name || res.data?.taxpayerName || '';
+    form.value.registeredName = tinName.value || form.value.registeredName;
   } catch (err) {
     error.value = apiErrorMessage(err, t('auth.tinVerifyFailed'));
   } finally {
-    verifying.value = false;
+    lookingUp.value = false;
   }
 };
 
-const register = async () => {
+const submit = async () => {
   error.value = '';
-  if (!adminName.value.trim() || !adminPhone.value.trim()) {
-    error.value = t('auth.adminRequired');
+  const f = form.value;
+  if (!f.firstName.trim() || !f.idNumber.trim()) {
+    error.value = t('validation.required');
     return;
   }
-  if (!isValidPhone(adminPhone.value)) {
+  if (!isValidEmail(f.email)) {
+    error.value = t('validation.email');
+    return;
+  }
+  if (!isValidPhone(f.phone)) {
     error.value = t('validation.phone');
     return;
   }
+  if (f.password.length < 8) {
+    error.value = t('auth.passwordTooShort');
+    return;
+  }
+  if (needsCertificate.value && !f.certificate) {
+    error.value = t('filer.certificateRequired');
+    return;
+  }
+
   loading.value = true;
   try {
-    const result = await AuthService.registerCompany({
-      tinNumber: tin.value,
-      adminName: adminName.value.trim(),
-      adminPhone: normalizePhone(adminPhone.value),
-    });
-    companyId.value = result.companyId;
-    step.value = 2;
+    const started = await AuthService.register({ ...f, phone: normalizePhone(f.phone) });
+    challenge.value = started.challenge;
+    phoneHint.value = started.phoneHint;
+    step.value = 'code';
+    toast.add({ severity: 'success', summary: t('auth.codeSentTitle'), detail: t('auth.codeSent'), life: 4000 });
   } catch (err) {
     error.value = apiErrorMessage(err, t('auth.registerFailed'));
   } finally {
@@ -91,7 +127,7 @@ const register = async () => {
   }
 };
 
-const verifyCode = async () => {
+const verify = async () => {
   error.value = '';
   if (!isValidOtp(otp.value)) {
     error.value = t('validation.otp');
@@ -99,12 +135,7 @@ const verifyCode = async () => {
   }
   loading.value = true;
   try {
-    await AuthService.verifyCompany({
-      companyId: companyId.value,
-      phone: normalizePhone(adminPhone.value),
-      otp: otp.value,
-      adminName: adminName.value.trim(),
-    });
+    await AuthService.completeLogin(challenge.value, otp.value);
     emit('update:visible', false);
     emit('registered');
   } catch (err) {
@@ -118,98 +149,95 @@ const verifyCode = async () => {
 <template>
   <AuthDialogShell
     :visible="visible"
-    width="480px"
-    :title="t('auth.registerTitle')"
-    :subtitle="t('auth.registerSubtitle')"
+    :title="step === 'code' ? t('auth.codeTitle') : t('auth.createAccount')"
+    :subtitle="step === 'code' ? t('auth.codeSubtitle') : t('auth.registerSubtitle')"
     :error="error"
     @update:visible="emit('update:visible', $event)"
   >
-    <div v-if="step === 1" class="auth-form">
-      <form class="auth-field" novalidate @submit.prevent="verifyTin">
-        <label for="reg-tin"><i class="pi pi-id-card"></i> {{ t('auth.companyTin') }}</label>
-        <div class="flex gap-2">
-          <InputText
-            id="reg-tin"
-            v-model="tin"
-            placeholder="XXX-XXX-XXX"
-            class="flex-1 auth-input min-w-0"
-            inputmode="numeric"
-            :disabled="!!company"
-          />
-          <Button v-if="!company" type="submit" :label="t('auth.verify')" icon="pi pi-search" :loading="verifying" class="auth-btn" />
-          <Button v-else icon="pi pi-check-circle" severity="success" disabled :aria-label="t('appellants.tinVerifiedTitle')" />
-        </div>
-      </form>
-
-      <dl v-if="company" class="company-preview">
-        <div>
-          <dt>{{ t('auth.company') }}</dt>
-          <dd>
-            <strong>{{ company.name }}</strong>
-          </dd>
-        </div>
-        <div>
-          <dt>{{ t('auth.business') }}</dt>
-          <dd>{{ company.business || t('common.dash') }}</dd>
-        </div>
-        <div>
-          <dt>{{ t('auth.vat') }}</dt>
-          <dd>{{ company.vat || t('common.dash') }}</dd>
-        </div>
-        <div>
-          <dt>{{ t('fields.address') }}</dt>
-          <dd>{{ company.address || t('common.dash') }}</dd>
-        </div>
-      </dl>
-
-      <form v-if="company" class="auth-form" novalidate @submit.prevent="register">
-        <div class="auth-divider">
-          <span>{{ t('auth.adminDetails') }}</span>
-        </div>
-        <div class="auth-field">
-          <label for="reg-name"><i class="pi pi-user"></i> {{ t('auth.fullName') }}</label>
-          <InputText
-            id="reg-name"
-            v-model="adminName"
-            :placeholder="t('auth.fullNamePlaceholder')"
-            class="w-full auth-input"
-            autocomplete="name"
-          />
-        </div>
-        <div class="auth-field">
-          <label for="reg-phone"><i class="pi pi-mobile"></i> {{ t('auth.phoneLabel') }}</label>
-          <InputText
-            id="reg-phone"
-            v-model="adminPhone"
-            placeholder="0712345678"
-            class="w-full auth-input"
-            maxlength="16"
-            inputmode="tel"
-            autocomplete="tel"
-          />
-        </div>
-        <Button
-          type="submit"
-          :label="t('auth.registerSendCode')"
-          icon="pi pi-send"
-          class="w-full auth-btn"
-          :loading="loading"
-          :disabled="!adminName || !adminPhone"
+    <form v-if="step === 'details'" class="auth-form" novalidate @submit.prevent="submit">
+      <div class="auth-field">
+        <label for="reg-kind"><i class="pi pi-id-card"></i> {{ t('filer.kind') }}</label>
+        <Select
+          v-model="form.kind"
+          input-id="reg-kind"
+          :options="kindOptions"
+          option-label="label"
+          option-value="value"
+          class="w-full"
         />
-      </form>
-
-      <div class="auth-divider">
-        <span>{{ t('auth.alreadyRegistered') }}</span>
       </div>
-      <button type="button" class="auth-secondary" @click="emit('sign-in')">
-        <i class="pi pi-sign-in"></i> {{ t('auth.signInInstead') }}
-      </button>
-    </div>
 
-    <form v-else class="auth-form" novalidate @submit.prevent="verifyCode">
+      <div class="auth-field">
+        <label for="reg-number">{{ idLabel }}</label>
+        <div class="with-action">
+          <InputText id="reg-number" v-model="form.idNumber" class="w-full auth-input" />
+          <Button
+            v-if="isCompany"
+            type="button"
+            :label="t('auth.checkTin')"
+            size="small"
+            outlined
+            :loading="lookingUp"
+            @click="lookupTin"
+          />
+        </div>
+        <small v-if="tinName" class="found">{{ tinName }}</small>
+      </div>
+
+      <div class="auth-field">
+        <label for="reg-registered-name">{{ t('filer.registeredName') }}</label>
+        <InputText id="reg-registered-name" v-model="form.registeredName" class="w-full auth-input" />
+      </div>
+
+      <div v-if="needsCertificate" class="auth-field">
+        <label>{{ t('filer.certificate') }}</label>
+        <FilePicker v-model="form.certificate" accept="application/pdf,image/*" />
+        <small>{{ t('filer.certificateHint') }}</small>
+      </div>
+
+      <div class="auth-row">
+        <div class="auth-field">
+          <label for="reg-first">{{ t('fields.firstName') }}</label>
+          <InputText id="reg-first" v-model="form.firstName" class="w-full auth-input" autocomplete="given-name" />
+        </div>
+        <div class="auth-field">
+          <label for="reg-last">{{ t('fields.lastName') }}</label>
+          <InputText id="reg-last" v-model="form.lastName" class="w-full auth-input" autocomplete="family-name" />
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <label for="reg-email"><i class="pi pi-envelope"></i> {{ t('fields.email') }}</label>
+        <InputText id="reg-email" v-model="form.email" type="email" class="w-full auth-input" autocomplete="email" />
+      </div>
+
+      <div class="auth-field">
+        <label for="reg-phone"><i class="pi pi-mobile"></i> {{ t('auth.phoneLabel') }}</label>
+        <InputText id="reg-phone" v-model="form.phone" placeholder="0712 345 678" class="w-full auth-input" inputmode="tel" />
+        <small>{{ t('auth.phoneForCode') }}</small>
+      </div>
+
+      <div class="auth-field">
+        <label for="reg-password"><i class="pi pi-lock"></i> {{ t('auth.passwordLabel') }}</label>
+        <Password
+          id="reg-password"
+          v-model="form.password"
+          toggle-mask
+          input-class="w-full auth-input"
+          class="w-full"
+          autocomplete="new-password"
+        />
+        <small>{{ t('auth.passwordRule') }}</small>
+      </div>
+
+      <Button type="submit" :label="t('auth.createAccount')" :loading="loading" class="w-full auth-btn" icon="pi pi-user-plus" />
+      <button type="button" class="auth-link" @click="emit('sign-in')"><i class="pi pi-sign-in"></i> {{ t('auth.haveAccount') }}</button>
+    </form>
+
+    <form v-else class="auth-form" novalidate @submit.prevent="verify">
       <div class="otp-icon"><i class="pi pi-lock"></i></div>
       <p class="otp-info">
-        {{ t('auth.enterCode') }}<br /><strong>{{ adminPhone }}</strong>
+        {{ t('auth.enterCode') }}<br /><strong>{{ phoneHint }}</strong>
       </p>
       <InputText
         v-model="otp"
@@ -220,36 +248,32 @@ const verifyCode = async () => {
         autocomplete="one-time-code"
         :aria-label="t('validation.otp')"
       />
-      <Button type="submit" :label="t('auth.verifyComplete')" icon="pi pi-check" class="w-full auth-btn" :loading="loading" />
-      <button type="button" class="auth-link" @click="step = 1"><i class="pi pi-arrow-left"></i> {{ t('common.back') }}</button>
+      <Button type="submit" :label="t('auth.finishSetup')" :loading="loading" class="w-full auth-btn" icon="pi pi-check" />
     </form>
   </AuthDialogShell>
 </template>
 
 <style scoped>
-.company-preview {
-  background: #f0fdf4;
-  border: 1px solid #86efac;
-  border-radius: 10px;
-  padding: 0.6rem 0.8rem;
-  margin: 0;
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
 }
-.company-preview div {
+@media (max-width: 520px) {
+  .auth-row {
+    grid-template-columns: 1fr;
+  }
+}
+.with-action {
   display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.25rem 0;
-  font-size: 0.8rem;
-  border-bottom: 1px solid #d1fae5;
+  gap: 0.4rem;
+  align-items: center;
 }
-.company-preview div:last-child {
-  border-bottom: none;
+.with-action :deep(input) {
+  flex: 1;
 }
-.company-preview dt {
-  color: var(--trab-muted);
-}
-.company-preview dd {
-  margin: 0;
-  text-align: right;
+.found {
+  color: #047857;
+  font-weight: 600;
 }
 </style>

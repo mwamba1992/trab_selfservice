@@ -224,7 +224,8 @@ export default {
     unread: 'You have {count} unread notification(s)',
     quickActions: 'Quick Actions',
     actions: {
-      appellants: { label: 'My Appellants', desc: 'Manage companies you represent' },
+      appellants: {
+label: 'My Appellants', desc: 'Manage companies you represent' },
       fileNotice: { label: 'File a Notice', desc: 'Start a new Notice of Appeal' },
       notices: { label: 'My Notices', desc: 'View and track your filed notices' },
       appeals: { label: 'My Appeals', desc: 'Follow your appeal cases' },
@@ -235,7 +236,7 @@ export default {
   appellants: {
     title: 'My Appellants',
     subtitle: 'Manage companies and individuals you represent',
-    addByTin: 'Add Appellant by TIN Number',
+    registerIntro: 'Register a taxpayer you act for. The Board checks the TIN with TRA before adding them.',
     tinPlaceholder: 'Enter TIN number e.g. 123-456-789',
     registerNew: 'Register New',
     tinMin: 'Enter at least 3 characters of the TIN',

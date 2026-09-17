@@ -230,7 +230,8 @@ export default {
     unread: 'Una arifa {count} ambazo hujazisoma',
     quickActions: 'Huduma za Haraka',
     actions: {
-      appellants: { label: 'Warufani Wangu', desc: 'Simamia kampuni unazoziwakilisha' },
+      appellants: {
+label: 'Warufani Wangu', desc: 'Simamia kampuni unazoziwakilisha' },
       fileNotice: { label: 'Wasilisha Taarifa', desc: 'Anza taarifa mpya ya kusudio la rufani' },
       notices: { label: 'Taarifa Zangu', desc: 'Angalia na ufuatilie taarifa ulizowasilisha' },
       appeals: { label: 'Rufani Zangu', desc: 'Fuatilia mashauri yako ya rufani' },
@@ -241,7 +242,7 @@ export default {
   appellants: {
     title: 'Warufani Wangu',
     subtitle: 'Simamia kampuni na watu binafsi unaowawakilisha',
-    addByTin: 'Ongeza Mrufani kwa Namba ya TIN',
+    registerIntro: 'Sajili mlipakodi unayemwakilisha. Bodi huthibitisha TIN na TRA kabla ya kumwongeza.',
     tinPlaceholder: 'Weka namba ya TIN mfano 123-456-789',
     registerNew: 'Sajili Mpya',
     tinMin: 'Weka angalau herufi 3 za TIN',

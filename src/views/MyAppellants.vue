@@ -22,9 +22,6 @@ const failed = ref(false);
 const filterText = ref('');
 
 // Search by TIN
-const tinSearch = ref('');
-const searchResults = ref([]);
-const searching = ref(false);
 
 // Register new
 const registerVisible = ref(false);
@@ -63,47 +60,6 @@ const filtered = computed(() => {
   if (!q) return appellants.value;
   return appellants.value.filter((a) => fullName(a).toLowerCase().includes(q) || (a.tinNumber || '').toLowerCase().includes(q));
 });
-
-const searchByTin = async () => {
-  if (tinSearch.value.trim().length < 3) {
-    toast.add({ severity: 'warn', summary: t('common.validation'), detail: t('appellants.tinMin'), life: 3000 });
-    return;
-  }
-  searching.value = true;
-  try {
-    // Stored TINs use the XXX-XXX-XXX format
-    searchResults.value = await SelfServiceAppellants.searchByTin(formatTin(tinSearch.value));
-    if (!searchResults.value.length) {
-      toast.add({ severity: 'info', summary: t('appellants.notFoundTitle'), detail: t('appellants.notFound'), life: 4000 });
-    }
-  } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('appellants.searchFailed')), life: 4000 });
-  } finally {
-    searching.value = false;
-  }
-};
-
-const linkAppellant = async (appellant) => {
-  try {
-    await SelfServiceAppellants.link(appellant.id);
-    toast.add({
-      severity: 'success',
-      summary: t('common.success'),
-      detail: t('appellants.added', { name: fullName(appellant) }),
-      life: 3000,
-    });
-    searchResults.value = [];
-    tinSearch.value = '';
-    await loadData();
-  } catch (err) {
-    toast.add({
-      severity: 'warn',
-      summary: t('common.validation'),
-      detail: apiErrorMessage(err, t('appellants.alreadyListed')),
-      life: 3000,
-    });
-  }
-};
 
 const unlinkAppellant = (appellant) => {
   confirm.require({
@@ -176,7 +132,7 @@ const resetTin = () => {
 };
 
 const openRegister = () => {
-  newForm.value = { ...emptyForm(), tinNumber: tinSearch.value.trim() };
+  newForm.value = emptyForm();
   formErrors.value = {};
   resetTin();
   registerVisible.value = true;
@@ -203,8 +159,6 @@ const saveNew = async () => {
     });
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('appellants.registered'), life: 3000 });
     registerVisible.value = false;
-    searchResults.value = [];
-    tinSearch.value = '';
     await loadData();
   } catch (err) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('common.actionFailed')), life: 5000 });
@@ -222,29 +176,9 @@ const saveNew = async () => {
     </div>
 
     <div class="ss-card mb-3">
-      <h4 class="text-sm font-semibold mb-2 text-label">{{ t('appellants.addByTin') }}</h4>
-      <form class="flex items-center gap-3 flex-wrap" @submit.prevent="searchByTin">
-        <InputText
-          v-model="tinSearch"
-          :placeholder="t('appellants.tinPlaceholder')"
-          :aria-label="t('fields.tinNumber')"
-          class="search-input"
-          inputmode="numeric"
-        />
-        <Button type="submit" :label="t('common.search')" icon="pi pi-search" class="trab-btn" size="small" :loading="searching" />
-        <Button type="button" :label="t('appellants.registerNew')" icon="pi pi-plus" outlined size="small" @click="openRegister" />
-      </form>
-
-      <div v-if="searchResults.length" class="mt-3">
-        <p class="text-xs font-semibold mb-2 text-muted">{{ t('appellants.found', { count: searchResults.length }) }}</p>
-        <div v-for="r in searchResults" :key="r.id" class="search-result">
-          <div class="flex-1 min-w-0">
-            <span class="text-sm font-semibold text-heading">{{ fullName(r) }}</span>
-            <span class="text-xs ml-2 text-muted">{{ t('fields.tin') }}: {{ r.tinNumber }}</span>
-            <span class="text-xs ml-2 text-subtle">{{ r.phone || '' }}</span>
-          </div>
-          <Button :label="t('appellants.addToClients')" icon="pi pi-plus" size="small" class="trab-btn" @click="linkAppellant(r)" />
-        </div>
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <p class="text-sm text-muted m-0">{{ t('appellants.registerIntro') }}</p>
+        <Button type="button" :label="t('appellants.registerNew')" icon="pi pi-plus" class="trab-btn" size="small" @click="openRegister" />
       </div>
     </div>
 

@@ -1,6 +1,5 @@
 export default {
   common: {
-    continue: 'Continue',
     board: 'Tax Revenue Appeals Board',
     republic: 'The United Republic of Tanzania',
     portal: 'Self Service Portal',
@@ -139,13 +138,6 @@ export default {
     expired: 'Your session has ended. Sign in again to continue — unfinished forms are kept.',
   },
   auth: {
-    step: {
-      identity: 'Who you are',
-      details: 'Your details',
-      code: 'Confirm',
-    },
-    identityLede: 'The Board accepts filings from people it can identify. Choose what you file as, and give the number you are known by.',
-    detailsLede: 'How you will sign in, and how the Board reaches you.',
     checkTin: 'Check',
     phoneForCode: 'We send your sign-in code to this number.',
     passwordRule: 'At least 8 characters.',

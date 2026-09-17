@@ -6,6 +6,7 @@ import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import LoginDialog from '@/components/auth/LoginDialog.vue';
+import RegisterDialog from '@/components/auth/RegisterDialog.vue';
 import { safeRedirect } from '@/router/index.js';
 import { session } from '@/service/session.js';
 
@@ -16,11 +17,16 @@ const toast = useToast();
 const year = new Date().getFullYear();
 
 const showLogin = ref(false);
+const showRegister = ref(false);
+
 const openLogin = () => {
+  showRegister.value = false;
   showLogin.value = true;
 };
-// Enrolment is three questions, so it has a page rather than a card.
-const goToRegister = () => router.push('/register');
+const openRegister = () => {
+  showLogin.value = false;
+  showRegister.value = true;
+};
 const goToApp = () => router.replace(safeRedirect(route.query.redirect, session.getUserType()));
 
 onMounted(() => {
@@ -58,7 +64,7 @@ const steps = ['register', 'notice', 'pay', 'statement'];
         <div class="topbar-actions">
           <LanguageSwitcher />
           <button class="btn-signin" @click="openLogin"><i class="pi pi-sign-in"></i> {{ t('auth.signIn') }}</button>
-          <button class="btn-register" @click="goToRegister"><i class="pi pi-user-plus"></i> {{ t('auth.createAccount') }}</button>
+          <button class="btn-register" @click="openRegister"><i class="pi pi-user-plus"></i> {{ t('auth.createAccount') }}</button>
         </div>
       </div>
     </header>
@@ -155,7 +161,8 @@ const steps = ['register', 'notice', 'pay', 'statement'];
       </div>
     </footer>
 
-    <LoginDialog v-model:visible="showLogin" @signed-in="goToApp" @register="goToRegister" />
+    <LoginDialog v-model:visible="showLogin" @signed-in="goToApp" @register="openRegister" />
+    <RegisterDialog v-model:visible="showRegister" @registered="goToApp" @sign-in="openLogin" />
   </div>
 </template>
 

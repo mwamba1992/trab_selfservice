@@ -79,7 +79,7 @@ const routes = [
   },
   { path: '/welcome', name: 'Landing', component: () => import('@/views/pages/auth/Landing.vue') },
   { path: '/login', redirect: '/welcome' },
-  { path: '/register', name: 'Register', component: () => import('@/views/pages/auth/Register.vue') },
+  { path: '/register', redirect: '/welcome' },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/pages/auth/NotFound.vue') },
 ];
 

@@ -97,6 +97,45 @@ describe('RegisterDialog', () => {
     expect(wrapper.find('.file-picker').exists()).toBe(true);
   });
 
+  it('holds each kind of number to its own shape', async () => {
+    const wrapper = open();
+    const field = () => wrapper.find('#reg-number');
+
+    // A TIN is nine digits, written in threes.
+    expect(field().attributes('maxlength')).toBe('11');
+    await field().setValue('123456789');
+    expect(field().element.value).toBe('123-456-789');
+
+    await wrapper.find('.kind').setValue('INDIVIDUAL');
+    expect(field().attributes('maxlength')).toBe('23');
+    expect(field().attributes('inputmode')).toBe('numeric');
+    // Letters are simply not taken, and the groups are written in as you type.
+    await field().setValue('1990abc0101 12345 00001 12');
+    expect(field().element.value).toBe('19900101-12345-00001-12');
+
+    // A roll number is whatever the roll says it is.
+    await wrapper.find('.kind').setValue('ADVOCATE');
+    await field().setValue('ADV-9002');
+    expect(field().element.value).toBe('ADV-9002');
+  });
+
+  it('will not send a National Identification Number that is not twenty digits', async () => {
+    const wrapper = open();
+    await wrapper.find('.kind').setValue('INDIVIDUAL');
+    await fill(wrapper, { idNumber: '1990010112345' });
+    await wrapper.find('form').trigger('submit');
+
+    expect(AuthService.register).not.toHaveBeenCalled();
+    expect(wrapper.find('.err').text()).toBe('A National Identification Number is 20 digits');
+  });
+
+  it('will not send a TIN that is not nine digits', async () => {
+    const wrapper = open();
+    await fill(wrapper, { idNumber: '12345' });
+    await wrapper.find('form').trigger('submit');
+    expect(AuthService.register).not.toHaveBeenCalled();
+  });
+
   it('will not send an advocate to the registry without the certificate', async () => {
     const wrapper = open();
     await wrapper.find('.kind').setValue('ADVOCATE');

@@ -26,6 +26,21 @@ export function formatTin(value) {
   return /^[0-9]{9}$/.test(digits) ? `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}` : String(value ?? '').trim();
 }
 
+/**
+ * A National Identification Number is twenty digits, written in four groups:
+ * 19900101-12345-00001-12. Only the digits matter to the Board.
+ */
+export function isValidNida(value) {
+  return /^[0-9]{20}$/.test(compact(value));
+}
+
+/** Groups what has been typed so far, so the field reads as a NIDA number. */
+export function formatNida(value) {
+  const digits = String(value ?? '').replace(/\D/g, '').slice(0, 20);
+  const groups = [digits.slice(0, 8), digits.slice(8, 13), digits.slice(13, 18), digits.slice(18, 20)];
+  return groups.filter(Boolean).join('-');
+}
+
 export function isValidEmail(value) {
   return EMAIL_REGEX.test(String(value ?? '').trim());
 }

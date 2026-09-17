@@ -10,6 +10,7 @@ import Tag from 'primevue/tag';
 import FilePicker from '@/components/FilePicker.vue';
 import { SelfServiceFiler } from '@/service/SelfServiceApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
+import { formatNida, formatTin, isValidNida, isValidTin } from '@/utils/validators.js';
 
 /**
  * Who this account is. The Board accepts filings from people it can identify
@@ -34,6 +35,18 @@ const kindOptions = computed(() => KINDS.map((kind) => ({ value: kind, label: t(
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
 const needsCertificate = computed(() => NEEDS_CERTIFICATE.includes(form.value.kind));
 const status = computed(() => identity.value?.status ?? null);
+
+/** Each kind's number has its own shape; see the registration dialog. */
+const NUMBER_RULES = {
+  ORGANISATION: { maxlength: 11, inputmode: 'numeric', placeholder: '123-456-789', format: formatTin, valid: isValidTin, message: 'validation.tin' },
+  INDIVIDUAL: { maxlength: 23, inputmode: 'numeric', placeholder: '19900101-12345-00001-12', format: formatNida, valid: isValidNida, message: 'validation.nida' },
+  ADVOCATE: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
+  TAX_CONSULTANT: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
+};
+const numberRule = computed(() => NUMBER_RULES[form.value.kind]);
+const onNumberInput = (event) => {
+  form.value.idNumber = numberRule.value.format(event.target.value);
+};
 const showForm = computed(() => editing.value || !identity.value || status.value === 'REJECTED');
 
 const load = async () => {
@@ -59,6 +72,10 @@ const load = async () => {
 load();
 
 const submit = async () => {
+  if (!numberRule.value.valid(form.value.idNumber)) {
+    toast.add({ severity: 'warn', summary: t('common.validation'), detail: t(numberRule.value.message), life: 4000 });
+    return;
+  }
   saving.value = true;
   try {
     identity.value = await SelfServiceFiler.declare(form.value);
@@ -122,7 +139,15 @@ const submit = async () => {
 
         <div class="field">
           <label for="filer-number">{{ idLabel }}</label>
-          <InputText id="filer-number" v-model="form.idNumber" class="w-full" />
+          <InputText
+            id="filer-number"
+            :model-value="form.idNumber"
+            :maxlength="numberRule.maxlength"
+            :inputmode="numberRule.inputmode"
+            :placeholder="numberRule.placeholder"
+            class="w-full"
+            @input="onNumberInput"
+          />
         </div>
 
         <div class="field">

@@ -72,6 +72,7 @@ export default {
     role: 'Role',
   },
   validation: {
+    nida: 'A National Identification Number is 20 digits',
     phone: 'Enter a valid phone number, e.g. 0712345678',
     tin: 'Enter a valid 9-digit TIN, e.g. 123-456-789',
     email: 'Enter a valid email address',

@@ -74,6 +74,7 @@ export default {
     role: 'Wadhifa',
   },
   validation: {
+    nida: 'Namba ya Kitambulisho cha Taifa ina tarakimu 20',
     phone: 'Weka namba sahihi ya simu, mfano 0712345678',
     tin: 'Weka TIN sahihi yenye tarakimu 9, mfano 123-456-789',
     email: 'Weka barua pepe sahihi',

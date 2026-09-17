@@ -10,7 +10,7 @@ import AuthDialogShell from './AuthDialogShell.vue';
 import FilePicker from '@/components/FilePicker.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { isValidEmail, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
+import { formatNida, formatTin, isValidEmail, isValidNida, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
 
 /**
  * A new portal account. The Board accepts filings from people it can identify,
@@ -53,6 +53,24 @@ const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
 const needsCertificate = computed(() => NEEDS_CERTIFICATE.includes(form.value.kind));
 const isCompany = computed(() => form.value.kind === 'ORGANISATION');
 
+/**
+ * Each kind of number has its own shape. A TIN and a NIDA number are digits in
+ * fixed groups, so the field takes digits only and writes the groups in as the
+ * person types; a roll number is whatever the roll says it is.
+ */
+const NUMBER_RULES = {
+  ORGANISATION: { maxlength: 11, inputmode: 'numeric', placeholder: '123-456-789', format: formatTin, valid: isValidTin, message: 'validation.tin' },
+  INDIVIDUAL: { maxlength: 23, inputmode: 'numeric', placeholder: '19900101-12345-00001-12', format: formatNida, valid: isValidNida, message: 'validation.nida' },
+  ADVOCATE: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
+  TAX_CONSULTANT: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
+};
+const numberRule = computed(() => NUMBER_RULES[form.value.kind]);
+
+/** Keeps the number in the shape its kind uses while it is being typed. */
+const onNumberInput = (event) => {
+  form.value.idNumber = numberRule.value.format(event.target.value);
+};
+
 watch(
   () => props.visible,
   (open) => {
@@ -92,8 +110,12 @@ const lookupTin = async () => {
 const submit = async () => {
   error.value = '';
   const f = form.value;
-  if (!f.firstName.trim() || !f.idNumber.trim()) {
+  if (!f.firstName.trim()) {
     error.value = t('validation.required');
+    return;
+  }
+  if (!numberRule.value.valid(f.idNumber)) {
+    error.value = t(numberRule.value.message);
     return;
   }
   if (!isValidEmail(f.email)) {
@@ -170,7 +192,15 @@ const verify = async () => {
       <div class="auth-field">
         <label for="reg-number">{{ idLabel }}</label>
         <div class="with-action">
-          <InputText id="reg-number" v-model="form.idNumber" class="w-full auth-input" />
+          <InputText
+            id="reg-number"
+            :model-value="form.idNumber"
+            :maxlength="numberRule.maxlength"
+            :inputmode="numberRule.inputmode"
+            :placeholder="numberRule.placeholder"
+            class="w-full auth-input"
+            @input="onNumberInput"
+          />
           <Button
             v-if="isCompany"
             type="button"

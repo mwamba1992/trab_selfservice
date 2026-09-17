@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidPhone, normalizePhone, isValidTin, formatTin, isValidEmail, isValidOtp, daysSince } from './validators.js';
+import { isValidPhone, normalizePhone, isValidTin, formatTin, isValidEmail, isValidOtp, daysSince, isValidNida, formatNida } from './validators.js';
 
 describe('validators', () => {
   it('accepts Tanzanian phone formats and rejects others', () => {
@@ -40,5 +40,28 @@ describe('validators', () => {
     expect(daysSince('2026-08-15', today)).toBe(30);
     expect(daysSince('2026-09-20', today)).toBe(-6);
     expect(daysSince('', today)).toBeNull();
+  });
+});
+
+describe('NIDA numbers', () => {
+  it('takes twenty digits, however they were typed', () => {
+    expect(isValidNida('19900101123450000112')).toBe(true);
+    expect(isValidNida('19900101-12345-00001-12')).toBe(true);
+    expect(isValidNida('1990 0101 1234 5000 0112')).toBe(true);
+  });
+
+  it('refuses anything that is not twenty digits', () => {
+    expect(isValidNida('123')).toBe(false);
+    expect(isValidNida('199001011234500001123')).toBe(false);
+    expect(isValidNida('1990010112345000011X')).toBe(false);
+    expect(isValidNida('')).toBe(false);
+  });
+
+  it('groups what has been typed so far, and stops at twenty digits', () => {
+    expect(formatNida('19900101')).toBe('19900101');
+    expect(formatNida('1990010112345')).toBe('19900101-12345');
+    expect(formatNida('19900101123450000112')).toBe('19900101-12345-00001-12');
+    // Letters and extra digits are simply not taken.
+    expect(formatNida('1990-0101 abc 12345000011299')).toBe('19900101-12345-00001-12');
   });
 });

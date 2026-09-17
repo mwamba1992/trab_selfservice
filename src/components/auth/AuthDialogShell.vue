@@ -19,7 +19,7 @@ defineEmits(['update:visible']);
     :show-header="false"
     :style="{ width }"
     :breakpoints="{ '520px': '94vw' }"
-    :content-style="{ padding: '0', borderRadius: '20px', overflow: 'hidden' }"
+    :content-style="{ padding: '0', borderRadius: '20px', overflow: 'hidden', display: 'flex' }"
     :pt="{ mask: { class: 'auth-mask' } }"
     dismissable-mask
     @update:visible="$emit('update:visible', $event)"
@@ -47,13 +47,23 @@ defineEmits(['update:visible']);
 }
 .auth-dialog {
   font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  /* Registration runs to nine fields; it scrolls inside the card rather than
+     off the bottom of the screen. */
+  max-height: min(90vh, 860px);
+  width: 100%;
+  min-height: 0;
 }
 .auth-accent {
+  flex: none;
   height: 4px;
   background: linear-gradient(90deg, #1b6b3d, #d4af37, #1b365d);
 }
 .auth-body {
   padding: 2rem 2.5rem 2.5rem;
+  overflow-y: auto;
+  min-height: 0;
 }
 .auth-header {
   text-align: center;

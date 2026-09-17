@@ -74,6 +74,11 @@ export const TraApi = {
     return data(await api.put(`/tra/appeals/${id}/dispute-no`, { disputeNo }));
   },
 
+  /** The exhibits on the appeal, as the Board ruled on them. Read only. */
+  async getExhibits(appealId) {
+    return data(await api.get(`/tra/appeals/${appealId}/exhibits`));
+  },
+
   // ─── Defence, filings and written submissions ───
   async replies(id) {
     return data(await api.get(`/tra/appeals/${id}/reply`));

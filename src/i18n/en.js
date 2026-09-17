@@ -438,6 +438,20 @@ export default {
     filed: 'Your reply has been filed',
     attachment: 'Attachment',
   },
+  exhibits: {
+    title: 'Exhibits',
+    intro:
+      'The documents already on your appeal that the Board admitted in evidence at the hearing. From here each one is referred to by its mark.',
+    none: 'The Board has not ruled on any document yet.',
+    tenderedByAppellant: 'tendered by you',
+    tenderedByRespondent: 'tendered by TRA',
+    admittedOn: 'admitted {date}',
+    inRegister: 'In the signed register',
+    notInRegister: 'Not yet in the register',
+    refusedTitle: 'Documents the Board did not admit',
+    signedOn: 'The register of exhibits was signed on {date}.',
+    failed: 'The exhibits could not be loaded.',
+  },
   submissions: {
     title: 'Written submissions',
     intro:

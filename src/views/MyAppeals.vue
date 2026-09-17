@@ -12,6 +12,7 @@ import Dialog from 'primevue/dialog';
 import DocumentsDialog from '@/components/DocumentsDialog.vue';
 import ResubmitDialog from '@/components/ResubmitDialog.vue';
 import SubmissionsDialog from '@/components/SubmissionsDialog.vue';
+import ExhibitsDialog from '@/components/ExhibitsDialog.vue';
 import RepliesDialog from '@/components/RepliesDialog.vue';
 import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
@@ -80,6 +81,14 @@ onMounted(() => {
 
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
 const returned = computed(() => returnedFilings(appeals.value));
+
+// What the Board admitted in evidence, and the mark each document now carries.
+const exhibitsVisible = ref(false);
+const exhibitsAppeal = ref(null);
+const openExhibits = (appeal) => {
+  exhibitsAppeal.value = appeal;
+  exhibitsVisible.value = true;
+};
 
 // Written submissions for the next hearing.
 const submissionsVisible = ref(false);
@@ -234,6 +243,15 @@ const openCorrect = (appeal) => {
                 @click="openSubmissions(data)"
               />
               <Button
+                v-tooltip.top="t('exhibits.title')"
+                icon="pi pi-paperclip"
+                text
+                rounded
+                size="small"
+                :aria-label="t('exhibits.title')"
+                @click="openExhibits(data)"
+              />
+              <Button
                 v-if="data.filingStatus === 'RETURNED'"
                 v-tooltip.top="t('filingStatus.correctTitle')"
                 icon="pi pi-pencil"
@@ -340,6 +358,7 @@ const openCorrect = (appeal) => {
     />
 
     <SubmissionsDialog v-model:visible="submissionsVisible" :appeal="submissionsAppeal" />
+    <ExhibitsDialog v-model:visible="exhibitsVisible" :appeal="exhibitsAppeal" />
 
     <RepliesDialog v-model:visible="repliesVisible" :appeal="repliesAppeal" />
 

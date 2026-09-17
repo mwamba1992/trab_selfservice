@@ -18,6 +18,7 @@ import OverviewPanel from '@/components/tra/OverviewPanel.vue';
 import DefencePanel from '@/components/tra/DefencePanel.vue';
 import FilingsPanel from '@/components/tra/FilingsPanel.vue';
 import SubmissionsPanel from '@/components/tra/SubmissionsPanel.vue';
+import ExhibitsPanel from '@/components/tra/ExhibitsPanel.vue';
 import DocumentsPanel from '@/components/tra/DocumentsPanel.vue';
 import NotesPanel from '@/components/tra/NotesPanel.vue';
 
@@ -59,6 +60,7 @@ const tabs = computed(() => {
     { key: 'overview', label: 'Overview', icon: 'pi-info-circle', count: 0 },
     { key: 'reply', label: 'Defence', icon: 'pi-pencil', count: replies.value.length },
     { key: 'submissions', label: 'Submissions', icon: 'pi-file-edit', count: 0 },
+    { key: 'exhibits', label: 'Exhibits', icon: 'pi-paperclip', count: 0 },
     { key: 'filings', label: 'Objections & appeal', icon: 'pi-flag', count: filings.value.length },
   ];
   if (canDocs.value) list.push({ key: 'documents', label: 'Documents', icon: 'pi-paperclip', count: documents.value.length });
@@ -269,6 +271,7 @@ onMounted(loadAll);
               @retry="reloadSection('replies')"
             />
             <SubmissionsPanel v-else-if="tab === 'submissions'" :appeal="appeal" :can-file="canReply" />
+            <ExhibitsPanel v-else-if="tab === 'exhibits'" :appeal="appeal" />
             <FilingsPanel
               v-else-if="tab === 'filings'"
               :appeal="appeal"

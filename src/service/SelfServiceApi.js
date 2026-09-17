@@ -125,6 +125,11 @@ export const SelfServiceAppeals = {
   async requestCopy(appealId, documentType) {
     return data(await api.post(`/self-service/appeals/${appealId}/copies`, { documentType }));
   },
+  /** The exhibits on the appeal, and whether the register has been signed. */
+  async getExhibits(appealId) {
+    return data(await api.get(`/self-service/appeals/${appealId}/exhibits`));
+  },
+
   /** Both sides' written submissions for the next hearing, with the closing day. */
   async getSubmissions(appealId) {
     return data(await api.get(`/self-service/appeals/${appealId}/submissions`));

@@ -444,6 +444,20 @@ export default {
     filed: 'Jibu lako limewasilishwa',
     attachment: 'Kiambatisho',
   },
+  exhibits: {
+    title: 'Vielelezo',
+    intro:
+      'Nyaraka zilizopo kwenye rufaa yako ambazo Bodi ilizikubali kama ushahidi kwenye usikilizwaji. Kuanzia sasa kila moja hutajwa kwa alama yake.',
+    none: 'Bodi haijatolea uamuzi nyaraka yoyote bado.',
+    tenderedByAppellant: 'iliwasilishwa na wewe',
+    tenderedByRespondent: 'iliwasilishwa na TRA',
+    admittedOn: 'ilikubaliwa {date}',
+    inRegister: 'Imo kwenye daftari lililosainiwa',
+    notInRegister: 'Bado haijaingizwa kwenye daftari',
+    refusedTitle: 'Nyaraka ambazo Bodi haikuzikubali',
+    signedOn: 'Daftari la vielelezo lilisainiwa tarehe {date}.',
+    failed: 'Vielelezo havikuweza kupakiwa.',
+  },
   submissions: {
     title: 'Hoja za maandishi',
     intro:

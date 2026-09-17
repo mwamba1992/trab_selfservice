@@ -228,3 +228,23 @@ export const SelfServiceCompany = {
     return data(await api.put(`/company/staff/${id}/reactivate`));
   },
 };
+
+/** Who the Board thinks this account is, and what it will accept from them. */
+export const SelfServiceFiler = {
+  async get() {
+    return data(await api.get('/self-service/filer-identity'));
+  },
+  /** kind + number, with the certificate where the kind needs one. */
+  async declare({ kind, idNumber, registeredName, certificate }) {
+    const form = new FormData();
+    form.append('kind', kind);
+    form.append('idNumber', idNumber);
+    if (registeredName) form.append('registeredName', registeredName);
+    if (certificate) form.append('certificate', certificate);
+    return data(
+      await api.post('/self-service/filer-identity', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }),
+    );
+  },
+};

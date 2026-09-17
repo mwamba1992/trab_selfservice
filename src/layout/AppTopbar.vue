@@ -64,6 +64,7 @@ const userMenuItems = computed(() =>
     ? [{ label: t('common.signOut'), icon: 'pi pi-sign-out', command: logout }]
     : [
         { label: t('nav.profile'), icon: 'pi pi-user', command: () => router.push('/profile') },
+        { label: t('nav.filer'), icon: 'pi pi-id-card', command: () => router.push('/who-you-are') },
         ...(profileStore.isCompanyAdmin ? [{ label: t('nav.staff'), icon: 'pi pi-users', command: () => router.push('/staff') }] : []),
         { separator: true },
         { label: t('common.signOut'), icon: 'pi pi-sign-out', command: logout },
@@ -165,6 +166,7 @@ watch(
           <span v-if="unread > 0" class="badge inline">{{ unreadLabel }}</span>
         </router-link>
         <router-link v-if="!isTra" to="/profile" class="drawer-link"><i class="pi pi-id-card"></i> {{ t('nav.profile') }}</router-link>
+        <router-link v-if="!isTra" to="/who-you-are" class="drawer-link"><i class="pi pi-verified"></i> {{ t('nav.filer') }}</router-link>
         <router-link v-if="!isTra && profileStore.isCompanyAdmin" to="/staff" class="drawer-link"
           ><i class="pi pi-sitemap"></i> {{ t('nav.staff') }}</router-link
         >

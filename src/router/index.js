@@ -24,6 +24,7 @@ const routes = [
       { path: 'notifications', name: 'Notifications', component: () => import('@/views/Notifications.vue') },
       { path: 'profile', name: 'Profile', component: () => import('@/views/Profile.vue') },
       { path: 'staff', name: 'StaffManagement', component: () => import('@/views/StaffManagement.vue') },
+      { path: 'who-you-are', name: 'FilerIdentity', component: () => import('@/views/FilerIdentity.vue') },
 
       // ─── TRA desk ───
       {

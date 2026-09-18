@@ -36,6 +36,11 @@ const ICONS = {
   SUMMONS_ISSUED: 'pi pi-calendar',
   SUMMONS_SERVED: 'pi pi-calendar-plus',
   DECISION_DELIVERED: 'pi pi-verified',
+  FILING_SUBMITTED: 'pi pi-send',
+  FILING_ACCEPTED: 'pi pi-check-circle',
+  FILING_RETURNED: 'pi pi-replay',
+  IDENTITY_VERIFIED: 'pi pi-id-card',
+  IDENTITY_REJECTED: 'pi pi-id-card',
 };
 
 const load = async (page = 1) => {

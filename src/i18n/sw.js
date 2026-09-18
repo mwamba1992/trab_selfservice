@@ -693,6 +693,31 @@ label: 'Warufani Wangu', desc: 'Simamia kampuni unazoziwakilisha' },
         title: 'Uamuzi umetolewa',
         message: 'Bodi imetoa uamuzi kuhusu rufani {caseNo}: {outcome}.',
       },
+      FILING_SUBMITTED: {
+        title: '{caseType} imewasilishwa',
+        message:
+          '{caseType} yako kwa {appellantName} imewasilishwa na inasubiri kupitiwa na msajili. Utaelezwa kiasi cha kulipa itakapokubaliwa.',
+      },
+      FILING_ACCEPTED: {
+        title: '{caseType} imekubaliwa',
+        message:
+          '{caseType} yako kwa {appellantName} imekubaliwa. Lipa namba ya udhibiti {controlNumber} (TZS {amount}) ili upewe namba ya shauri.',
+      },
+      FILING_RETURNED: {
+        title: '{caseType} imerudishwa kwa marekebisho',
+        message:
+          '{caseType} yako kwa {appellantName} imerudishwa na msajili: {reason}. Irekebishe kisha uwasilishe tena.',
+      },
+      IDENTITY_VERIFIED: {
+        title: 'Bodi imekubali wewe ni nani',
+        message:
+          '{idLabel} yako imekubaliwa na msajili. Kila unachowasilisha kuanzia sasa kinaandikwa kwa jina lako.',
+      },
+      IDENTITY_REJECTED: {
+        title: 'Bodi haikukubali wewe ni nani',
+        message:
+          'Msajili hakukubali {idLabel} yako: {reason}. Hadi jambo hili lirekebishwe, hakuna unachowasilisha kitakachokubaliwa kwenye rejista. Tuma taarifa nyingine kupitia mtandao.',
+      },
     },
   },
   profile: {

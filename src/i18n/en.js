@@ -686,6 +686,31 @@ label: 'My Appellants', desc: 'Manage companies you represent' },
         title: 'Decision delivered',
         message: 'The Board has delivered its decision on appeal {caseNo}: {outcome}.',
       },
+      FILING_SUBMITTED: {
+        title: '{caseType} submitted',
+        message:
+          'Your {caseType} for {appellantName} was submitted and is waiting to be checked by the registry. You will be told what to pay once it is accepted.',
+      },
+      FILING_ACCEPTED: {
+        title: '{caseType} accepted',
+        message:
+          'Your {caseType} for {appellantName} was accepted. Pay control number {controlNumber} (TZS {amount}) to receive a case number.',
+      },
+      FILING_RETURNED: {
+        title: '{caseType} returned for correction',
+        message:
+          'Your {caseType} for {appellantName} was returned by the registry: {reason}. Correct it and submit again.',
+      },
+      IDENTITY_VERIFIED: {
+        title: 'The Board has accepted who you are',
+        message:
+          'Your {idLabel} was accepted by the registry. Everything you file from now on is recorded in your name.',
+      },
+      IDENTITY_REJECTED: {
+        title: 'The Board did not accept who you are',
+        message:
+          'The registry did not accept your {idLabel}: {reason}. Until this is put right, nothing you file can be accepted onto the register. Send different details from the portal.',
+      },
     },
   },
   profile: {

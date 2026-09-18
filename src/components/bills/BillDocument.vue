@@ -33,34 +33,36 @@ const today = new Date().toISOString().split('T')[0];
     <div class="section-title">{{ t('bills.billInfo') }}</div>
     <div class="bill-info">
       <table>
-        <tr>
-          <td class="label">{{ t('fields.controlNumber') }}</td>
-          <td>
-            <strong>{{ controlNumber }}</strong>
-          </td>
-        </tr>
-        <tr>
-          <td class="label">{{ t('bills.paymentReference') }}</td>
-          <td>{{ bill.billReference }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ t('bills.payerName') }}</td>
-          <td>{{ bill.payerName }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ t('bills.payerPhone') }}</td>
-          <td>{{ bill.payerPhone || t('common.dash') }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ t('bills.description') }}</td>
-          <td>{{ bill.billDescription || statusLabel(bill.appType) }}</td>
-        </tr>
-        <tr>
-          <td class="label">{{ t('common.status') }}</td>
-          <td>
-            <strong :class="bill.billPaid ? 'status-paid' : 'status-unpaid'">{{ statusLabel(bill.billPaid ? 'PAID' : 'UNPAID') }}</strong>
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td class="label">{{ t('fields.controlNumber') }}</td>
+            <td>
+              <strong>{{ controlNumber }}</strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="label">{{ t('bills.paymentReference') }}</td>
+            <td>{{ bill.billReference }}</td>
+          </tr>
+          <tr>
+            <td class="label">{{ t('bills.payerName') }}</td>
+            <td>{{ bill.payerName }}</td>
+          </tr>
+          <tr>
+            <td class="label">{{ t('bills.payerPhone') }}</td>
+            <td>{{ bill.payerPhone || t('common.dash') }}</td>
+          </tr>
+          <tr>
+            <td class="label">{{ t('bills.description') }}</td>
+            <td>{{ bill.billDescription || statusLabel(bill.appType) }}</td>
+          </tr>
+          <tr>
+            <td class="label">{{ t('common.status') }}</td>
+            <td>
+              <strong :class="bill.billPaid ? 'status-paid' : 'status-unpaid'">{{ statusLabel(bill.billPaid ? 'PAID' : 'UNPAID') }}</strong>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <div v-if="qrDataUrl" class="qr">
         <img :src="qrDataUrl" alt="QR" />
@@ -101,24 +103,26 @@ const today = new Date().toISOString().split('T')[0];
 
     <div class="section-title">{{ t('bills.additional') }}</div>
     <table>
-      <tr>
-        <td class="label">{{ t('bills.amountWords') }}</td>
-        <td>
-          <em>{{ numberToWords(bill.billedAmount) }}.</em>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.expiresOn') }}</td>
-        <td>{{ bill.expiryDate || t('common.dash') }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.dateIssued') }}</td>
-        <td>{{ bill.generatedDate }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.printedOn') }}</td>
-        <td>{{ today }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="label">{{ t('bills.amountWords') }}</td>
+          <td>
+            <em>{{ numberToWords(bill.billedAmount) }}.</em>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.expiresOn') }}</td>
+          <td>{{ bill.expiryDate || t('common.dash') }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.dateIssued') }}</td>
+          <td>{{ bill.generatedDate }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.printedOn') }}</td>
+          <td>{{ today }}</td>
+        </tr>
+      </tbody>
     </table>
 
     <!-- Payment instructions are always printed in both languages -->

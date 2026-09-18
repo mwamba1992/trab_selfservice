@@ -15,40 +15,42 @@ const emit = defineEmits(['retry-parties']);
   <div>
     <h2 class="side-head">Case Summary</h2>
     <table class="view-table">
-      <tr>
-        <td class="view-label">Appeal No.</td>
-        <td>{{ appeal.appealNo || '-' }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Appellant</td>
-        <td>{{ appeal.appellantName }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Tax Type</td>
-        <td>{{ appeal.taxType?.name || '-' }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Region</td>
-        <td>{{ appeal.region?.name || '-' }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Filed</td>
-        <td>{{ formatDate(appeal.dateOfFiling) }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Reply Due</td>
-        <td>{{ formatDate(appeal.replyDueDate) }}</td>
-      </tr>
-      <tr>
-        <td class="view-label">Status</td>
-        <td><Tag :value="humanize(appeal.statusTrend)" severity="secondary" /></td>
-      </tr>
-      <tr>
-        <td class="view-label">Decision</td>
-        <td>
-          <Tag :value="humanize(appeal.outcomeOfDecision)" :severity="appeal.outcomeOfDecision === 'NO DECISION' ? 'warn' : 'success'" />
-        </td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="view-label">Appeal No.</td>
+          <td>{{ appeal.appealNo || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Appellant</td>
+          <td>{{ appeal.appellantName }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Tax Type</td>
+          <td>{{ appeal.taxType?.name || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Region</td>
+          <td>{{ appeal.region?.name || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Filed</td>
+          <td>{{ formatDate(appeal.dateOfFiling) }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Reply Due</td>
+          <td>{{ formatDate(appeal.replyDueDate) }}</td>
+        </tr>
+        <tr>
+          <td class="view-label">Status</td>
+          <td><Tag :value="humanize(appeal.statusTrend)" severity="secondary" /></td>
+        </tr>
+        <tr>
+          <td class="view-label">Decision</td>
+          <td>
+            <Tag :value="humanize(appeal.outcomeOfDecision)" :severity="appeal.outcomeOfDecision === 'NO DECISION' ? 'warn' : 'success'" />
+          </td>
+        </tr>
+      </tbody>
     </table>
 
     <div class="side-section">

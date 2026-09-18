@@ -10,7 +10,7 @@ import FilePicker from '@/components/FilePicker.vue';
 import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
+import { hasRegisteredName, identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
 import { isValidEmail, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
 
 /**
@@ -49,6 +49,7 @@ const form = ref({
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
 const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
 const isCompany = computed(() => form.value.kind === 'ORGANISATION');
+const showsRegisteredName = computed(() => hasRegisteredName(form.value.kind));
 
 const numberRule = computed(() => numberRuleFor(form.value.kind));
 const stepIndex = computed(() => STEPS.indexOf(step.value));
@@ -133,7 +134,13 @@ const submit = async () => {
   }
   loading.value = true;
   try {
-    const started = await AuthService.register({ ...f, phone: normalizePhone(f.phone) });
+    // A name typed under one kind must not travel under another: an
+    // individual is the name they already gave.
+    const started = await AuthService.register({
+      ...f,
+      phone: normalizePhone(f.phone),
+      registeredName: showsRegisteredName.value ? f.registeredName : '',
+    });
     challenge.value = started.challenge;
     phoneHint.value = started.phoneHint;
     step.value = 'code';
@@ -212,7 +219,7 @@ const verify = async () => {
 
     <!-- 2. Your details -->
     <form v-else-if="step === 'details'" class="auth-form" novalidate @submit.prevent="submit">
-      <div class="auth-field">
+      <div v-if="showsRegisteredName" class="auth-field">
         <label for="reg-registered-name">{{ t('filer.registeredName') }}</label>
         <InputText id="reg-registered-name" v-model="form.registeredName" class="w-full auth-input" />
       </div>

@@ -79,17 +79,19 @@ watch(
       <p v-if="!exhibits.length" class="muted">{{ t('exhibits.none') }}</p>
 
       <table v-else class="exhibits">
-        <tr v-for="exhibit in admitted" :key="exhibit.id">
-          <td class="mark">{{ exhibit.mark }}</td>
-          <td>
-            {{ exhibit.description }}
-            <span class="by">{{ tenderedBy(exhibit.party) }} · {{ t('exhibits.admittedOn', { date: formatDate(exhibit.ruledDate) }) }}</span>
-          </td>
-          <td class="state">
-            <Tag v-if="exhibit.signedAt" :value="t('exhibits.inRegister')" severity="success" />
-            <Tag v-else :value="t('exhibits.notInRegister')" severity="warn" />
-          </td>
-        </tr>
+        <tbody>
+          <tr v-for="exhibit in admitted" :key="exhibit.id">
+            <td class="mark">{{ exhibit.mark }}</td>
+            <td>
+              {{ exhibit.description }}
+              <span class="by">{{ tenderedBy(exhibit.party) }} · {{ t('exhibits.admittedOn', { date: formatDate(exhibit.ruledDate) }) }}</span>
+            </td>
+            <td class="state">
+              <Tag v-if="exhibit.signedAt" :value="t('exhibits.inRegister')" severity="success" />
+              <Tag v-else :value="t('exhibits.notInRegister')" severity="warn" />
+            </td>
+          </tr>
+        </tbody>
       </table>
 
       <template v-if="refused.length">

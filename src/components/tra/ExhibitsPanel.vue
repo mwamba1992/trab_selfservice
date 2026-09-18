@@ -55,17 +55,19 @@ onMounted(load);
       <p v-if="!exhibits.length" class="muted">The Board has not ruled on any document yet.</p>
 
       <table v-else class="exhibits">
-        <tr v-for="exhibit in admitted" :key="exhibit.id">
-          <td class="mark">{{ exhibit.mark }}</td>
-          <td>
-            {{ exhibit.description }}
-            <span class="by">tendered by {{ partyLabel(exhibit.party) }} · admitted {{ formatDate(exhibit.ruledDate) }}</span>
-          </td>
-          <td class="state">
-            <Tag v-if="exhibit.signedAt" value="In the signed register" severity="success" />
-            <Tag v-else value="Not yet in the register" severity="warn" />
-          </td>
-        </tr>
+        <tbody>
+          <tr v-for="exhibit in admitted" :key="exhibit.id">
+            <td class="mark">{{ exhibit.mark }}</td>
+            <td>
+              {{ exhibit.description }}
+              <span class="by">tendered by {{ partyLabel(exhibit.party) }} · admitted {{ formatDate(exhibit.ruledDate) }}</span>
+            </td>
+            <td class="state">
+              <Tag v-if="exhibit.signedAt" value="In the signed register" severity="success" />
+              <Tag v-else value="Not yet in the register" severity="warn" />
+            </td>
+          </tr>
+        </tbody>
       </table>
 
       <template v-if="refused.length">

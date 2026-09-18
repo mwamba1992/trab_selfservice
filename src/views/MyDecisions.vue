@@ -149,34 +149,36 @@ const wonSeverity = (w) => (/appellant/i.test(w || '') ? 'success' : /tra|commis
       <div v-if="viewData" class="trab-doc">
         <div class="section-title">{{ t('decisions.summarySection') }}</div>
         <table>
-          <tr>
-            <td class="label">{{ t('decisions.appealNumber') }}</td>
-            <td>
-              <strong>{{ viewData.appealNo || t('common.dash') }}</strong>
-            </td>
-          </tr>
-          <tr>
-            <td class="label">{{ t('fields.taxType') }}</td>
-            <td>{{ viewData.taxType?.name || t('common.dash') }}</td>
-          </tr>
-          <tr>
-            <td class="label">{{ t('decisions.decidedOn') }}</td>
-            <td>{{ viewData.decidedDate || t('common.dash') }}</td>
-          </tr>
-          <tr>
-            <td class="label">{{ t('decisions.decidedBy') }}</td>
-            <td>{{ viewData.decidedBy || t('common.dash') }}</td>
-          </tr>
-          <tr>
-            <td class="label">{{ t('decisions.outcome') }}</td>
-            <td>
-              <strong>{{ viewData.outcomeOfDecision }}</strong>
-            </td>
-          </tr>
-          <tr>
-            <td class="label">{{ t('decisions.wonBy') }}</td>
-            <td>{{ viewData.wonBy || t('common.dash') }}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td class="label">{{ t('decisions.appealNumber') }}</td>
+              <td>
+                <strong>{{ viewData.appealNo || t('common.dash') }}</strong>
+              </td>
+            </tr>
+            <tr>
+              <td class="label">{{ t('fields.taxType') }}</td>
+              <td>{{ viewData.taxType?.name || t('common.dash') }}</td>
+            </tr>
+            <tr>
+              <td class="label">{{ t('decisions.decidedOn') }}</td>
+              <td>{{ viewData.decidedDate || t('common.dash') }}</td>
+            </tr>
+            <tr>
+              <td class="label">{{ t('decisions.decidedBy') }}</td>
+              <td>{{ viewData.decidedBy || t('common.dash') }}</td>
+            </tr>
+            <tr>
+              <td class="label">{{ t('decisions.outcome') }}</td>
+              <td>
+                <strong>{{ viewData.outcomeOfDecision }}</strong>
+              </td>
+            </tr>
+            <tr>
+              <td class="label">{{ t('decisions.wonBy') }}</td>
+              <td>{{ viewData.wonBy || t('common.dash') }}</td>
+            </tr>
+          </tbody>
         </table>
 
         <div class="section-title">{{ t('decisions.decreeSection') }}</div>

@@ -14,6 +14,13 @@ const ACTS_FOR_OTHERS = ['ADVOCATE', 'TAX_CONSULTANT'];
 
 export const needsCertificate = (kind) => ACTS_FOR_OTHERS.includes(kind);
 
+/**
+ * An individual is the name they already gave, so asking again for the name
+ * "as it is registered" only invites a second, differing answer. A company
+ * has a name on the TIN, and the two who act for others have one on the roll.
+ */
+export const hasRegisteredName = (kind) => kind !== 'INDIVIDUAL';
+
 export const KIND_ICONS = {
   ORGANISATION: 'pi-building',
   INDIVIDUAL: 'pi-user',

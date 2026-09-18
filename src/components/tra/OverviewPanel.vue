@@ -39,16 +39,18 @@ const particulars = computed(() =>
     <template v-if="particulars.length || appeal.amounts?.length || appeal.remarks">
       <h2 class="sec-head mt-5">Particulars</h2>
       <table class="view-table">
-        <tr v-for="p in particulars" :key="p.label">
-          <td class="view-label">{{ p.label }}</td>
-          <td>{{ p.value }}</td>
-        </tr>
-        <tr v-if="appeal.amounts?.length">
-          <td class="view-label">Amount in dispute</td>
-          <td>
-            <div v-for="a in appeal.amounts" :key="a.id">{{ a.currency }} {{ formatMoney(a.amount) }}</div>
-          </td>
-        </tr>
+        <tbody>
+          <tr v-for="p in particulars" :key="p.label">
+            <td class="view-label">{{ p.label }}</td>
+            <td>{{ p.value }}</td>
+          </tr>
+          <tr v-if="appeal.amounts?.length">
+            <td class="view-label">Amount in dispute</td>
+            <td>
+              <div v-for="a in appeal.amounts" :key="a.id">{{ a.currency }} {{ formatMoney(a.amount) }}</div>
+            </td>
+          </tr>
+        </tbody>
       </table>
       <div v-if="appeal.remarks" class="remarks">
         <div class="lbl">Remarks</div>

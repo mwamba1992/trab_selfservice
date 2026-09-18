@@ -10,7 +10,7 @@ import FilePicker from '@/components/FilePicker.vue';
 import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import { SelfServiceFiler } from '@/service/SelfServiceApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
+import { hasRegisteredName, identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
 
 /**
  * Who this account is. The Board accepts filings from people it can identify
@@ -29,6 +29,7 @@ const form = ref({ kind: 'ORGANISATION', idNumber: '', registeredName: '', certi
 
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
 const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
+const showsRegisteredName = computed(() => hasRegisteredName(form.value.kind));
 const status = computed(() => identity.value?.status ?? null);
 
 /**
@@ -81,7 +82,10 @@ const submit = async () => {
   }
   saving.value = true;
   try {
-    identity.value = await SelfServiceFiler.declare(form.value);
+    identity.value = await SelfServiceFiler.declare({
+      ...form.value,
+      registeredName: showsRegisteredName.value ? form.value.registeredName : '',
+    });
     editing.value = false;
     form.value.certificate = null;
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('filer.saved'), life: 4000 });
@@ -146,7 +150,7 @@ const submit = async () => {
           />
         </div>
 
-        <div class="field">
+        <div v-if="showsRegisteredName" class="field">
           <label for="filer-name">{{ t('filer.registeredName') }}</label>
           <InputText id="filer-name" v-model="form.registeredName" class="w-full" />
         </div>

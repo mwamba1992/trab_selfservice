@@ -35,30 +35,32 @@ const today = new Date().toISOString().split('T')[0];
 
     <div class="section-title">{{ t('bills.receiptInfo') }}</div>
     <table>
-      <tr>
-        <td class="label">{{ t('bills.receiptNumber') }}</td>
-        <td>
-          <strong>{{ bill.billReference }}</strong>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.receivedFrom') }}</td>
-        <td>{{ bill.payerName || t('common.dash') }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('fields.amount') }}</td>
-        <td class="paid-amount">TZS {{ fmt(received) }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.amountWords') }}</td>
-        <td>
-          <em>{{ numberToWords(received) }}.</em>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.outstanding') }}</td>
-        <td>TZS {{ fmt(outstanding) }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="label">{{ t('bills.receiptNumber') }}</td>
+          <td>
+            <strong>{{ bill.billReference }}</strong>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.receivedFrom') }}</td>
+          <td>{{ bill.payerName || t('common.dash') }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('fields.amount') }}</td>
+          <td class="paid-amount">TZS {{ fmt(received) }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.amountWords') }}</td>
+          <td>
+            <em>{{ numberToWords(received) }}.</em>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.outstanding') }}</td>
+          <td>TZS {{ fmt(outstanding) }}</td>
+        </tr>
+      </tbody>
     </table>
 
     <div class="section-title">{{ t('bills.inRespectOf') }}</div>
@@ -94,24 +96,26 @@ const today = new Date().toISOString().split('T')[0];
 
     <div class="section-title">{{ t('bills.additional') }}</div>
     <table>
-      <tr>
-        <td class="label">{{ t('bills.billReference') }}</td>
-        <td>{{ bill.billReference }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('fields.controlNumber') }}</td>
-        <td>
-          <strong>{{ bill.billControlNumber || t('common.dash') }}</strong>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.paymentDate') }}</td>
-        <td>{{ bill.generatedDate || t('common.dash') }}</td>
-      </tr>
-      <tr>
-        <td class="label">{{ t('bills.printedOn') }}</td>
-        <td>{{ today }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="label">{{ t('bills.billReference') }}</td>
+          <td>{{ bill.billReference }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('fields.controlNumber') }}</td>
+          <td>
+            <strong>{{ bill.billControlNumber || t('common.dash') }}</strong>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.paymentDate') }}</td>
+          <td>{{ bill.generatedDate || t('common.dash') }}</td>
+        </tr>
+        <tr>
+          <td class="label">{{ t('bills.printedOn') }}</td>
+          <td>{{ today }}</td>
+        </tr>
+      </tbody>
     </table>
     <div class="signature">
       <span>{{ t('bills.signature') }}</span>

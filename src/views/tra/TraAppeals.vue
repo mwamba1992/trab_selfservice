@@ -349,7 +349,7 @@ onMounted(async () => {
             @change="apply"
           />
         </div>
-        <div class="field">
+        <div class="field field-wide">
           <label for="f-from">Filed between</label>
           <div class="date-range">
             <input
@@ -372,7 +372,7 @@ onMounted(async () => {
             />
           </div>
         </div>
-        <div class="field">
+        <div class="field field-wide">
           <span class="field-label">Quick range</span>
           <div class="quick-range" role="group" aria-label="Quick filed-date range">
             <button
@@ -470,6 +470,16 @@ onMounted(async () => {
   display: grid;
   gap: 0.35rem;
   align-content: start;
+  /* Grid children default to their content's width: without this the date
+     inputs push the field past its column and over the one beside it. */
+  min-width: 0;
+}
+/* A date range and the five quick ranges each need two columns to sit in one
+   row; on a narrow screen every field is full width anyway. */
+@media (min-width: 720px) {
+  .field-wide {
+    grid-column: span 2;
+  }
 }
 .field label,
 .field-label {
@@ -483,7 +493,7 @@ onMounted(async () => {
   gap: 0.45rem;
 }
 .date-input {
-  flex: 1;
+  flex: 1 1 8.5rem;
   min-width: 0;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--trab-border);
@@ -500,6 +510,9 @@ onMounted(async () => {
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
+  align-items: center;
+  /* The chips line up with the inputs beside them, not with the label. */
+  min-height: 2.15rem;
 }
 .seg-group {
   display: inline-flex;

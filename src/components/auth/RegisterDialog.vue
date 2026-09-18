@@ -4,13 +4,14 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Select from 'primevue/select';
 import Button from 'primevue/button';
 import AuthDialogShell from './AuthDialogShell.vue';
 import FilePicker from '@/components/FilePicker.vue';
+import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { formatNida, formatTin, isValidEmail, isValidNida, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
+import { identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
+import { isValidEmail, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
 
 /**
  * A new portal account. The Board accepts filings from people it can identify,
@@ -22,17 +23,6 @@ const emit = defineEmits(['update:visible', 'registered', 'sign-in']);
 
 const { t } = useI18n();
 const toast = useToast();
-
-const KINDS = ['ORGANISATION', 'INDIVIDUAL', 'ADVOCATE', 'TAX_CONSULTANT'];
-/** The two who act for other people must show the Board their standing. */
-const NEEDS_CERTIFICATE = ['ADVOCATE', 'TAX_CONSULTANT'];
-
-const KIND_ICONS = {
-  ORGANISATION: 'pi-building',
-  INDIVIDUAL: 'pi-user',
-  ADVOCATE: 'pi-briefcase',
-  TAX_CONSULTANT: 'pi-calculator',
-};
 
 const STEPS = ['identity', 'details', 'code'];
 const step = ref('identity');
@@ -56,23 +46,11 @@ const form = ref({
   certificate: null,
 });
 
-const kindOptions = computed(() => KINDS.map((kind) => ({ value: kind, label: t(`filer.kinds.${kind}`) })));
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
-const needsCertificate = computed(() => NEEDS_CERTIFICATE.includes(form.value.kind));
+const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
 const isCompany = computed(() => form.value.kind === 'ORGANISATION');
 
-/**
- * Each kind of number has its own shape. A TIN and a NIDA number are digits in
- * fixed groups, so the field takes digits only and writes the groups in as the
- * person types; a roll number is whatever the roll says it is.
- */
-const NUMBER_RULES = {
-  ORGANISATION: { maxlength: 11, inputmode: 'numeric', placeholder: '123-456-789', format: formatTin, valid: isValidTin, message: 'validation.tin' },
-  INDIVIDUAL: { maxlength: 23, inputmode: 'numeric', placeholder: '19900101-12345-00001-12', format: formatNida, valid: isValidNida, message: 'validation.nida' },
-  ADVOCATE: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
-  TAX_CONSULTANT: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
-};
-const numberRule = computed(() => NUMBER_RULES[form.value.kind]);
+const numberRule = computed(() => numberRuleFor(form.value.kind));
 const stepIndex = computed(() => STEPS.indexOf(step.value));
 
 const chooseKind = (kind) => {
@@ -84,16 +62,13 @@ const chooseKind = (kind) => {
 
 /** The first question answered: what you are, and the number that proves it. */
 const toDetails = () => {
-  error.value = '';
-  if (!numberRule.value.valid(form.value.idNumber)) {
-    error.value = t(numberRule.value.message);
-    return;
-  }
-  if (needsCertificate.value && !form.value.certificate) {
-    error.value = t('filer.certificateRequired');
-    return;
-  }
-  step.value = 'details';
+  const problem = identityProblem({
+    kind: form.value.kind,
+    idNumber: form.value.idNumber,
+    hasCertificate: Boolean(form.value.certificate),
+  });
+  error.value = problem ? t(problem) : '';
+  if (!problem) step.value = 'details';
 };
 
 /** Keeps the number in the shape its kind uses while it is being typed. */
@@ -206,20 +181,7 @@ const verify = async () => {
 
     <!-- 1. Who you are -->
     <form v-if="step === 'identity'" class="auth-form" novalidate @submit.prevent="toDetails">
-      <div class="kinds">
-        <button
-          v-for="kind in KINDS"
-          :key="kind"
-          type="button"
-          class="kind-tile"
-          :class="{ chosen: form.kind === kind }"
-          :aria-pressed="form.kind === kind"
-          @click="chooseKind(kind)"
-        >
-          <i class="pi" :class="KIND_ICONS[kind]"></i>
-          <span>{{ t(`filer.kinds.${kind}`) }}</span>
-        </button>
-      </div>
+      <FilerKindPicker :model-value="form.kind" class="mb-3" @update:model-value="chooseKind" />
 
       <div class="auth-field">
         <label for="reg-number">{{ idLabel }}</label>
@@ -280,8 +242,8 @@ const verify = async () => {
       <div class="auth-field">
         <label for="reg-password"><i class="pi pi-lock"></i> {{ t('auth.passwordLabel') }}</label>
         <Password
-          input-id="reg-password"
           v-model="form.password"
+          input-id="reg-password"
           toggle-mask
           input-class="w-full auth-input"
           class="w-full"
@@ -370,44 +332,6 @@ const verify = async () => {
   }
 }
 
-/* What you are, as four things to pick rather than a list to open. */
-.kinds {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin-bottom: 1.1rem;
-}
-.kind-tile {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.6rem 0.65rem;
-  border: 1px solid var(--trab-border);
-  border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.78rem;
-  color: var(--trab-text);
-  text-align: left;
-  line-height: 1.3;
-}
-.kind-tile i {
-  font-size: 0.95rem;
-  color: var(--trab-muted);
-  flex: none;
-}
-.kind-tile:hover {
-  border-color: var(--trab-primary);
-}
-.kind-tile.chosen {
-  border-color: var(--trab-primary);
-  background: #f0fdf4;
-  font-weight: 600;
-}
-.kind-tile.chosen i {
-  color: var(--trab-primary);
-}
 .auth-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

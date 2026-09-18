@@ -4,13 +4,13 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
 import Skeleton from 'primevue/skeleton';
 import Tag from 'primevue/tag';
 import FilePicker from '@/components/FilePicker.vue';
+import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import { SelfServiceFiler } from '@/service/SelfServiceApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { formatNida, formatTin, isValidNida, isValidTin } from '@/utils/validators.js';
+import { identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
 
 /**
  * Who this account is. The Board accepts filings from people it can identify
@@ -20,10 +20,6 @@ import { formatNida, formatTin, isValidNida, isValidTin } from '@/utils/validato
 const { t } = useI18n();
 const toast = useToast();
 
-const KINDS = ['ORGANISATION', 'INDIVIDUAL', 'ADVOCATE', 'TAX_CONSULTANT'];
-/** The two who act for other people must show the Board their standing. */
-const NEEDS_CERTIFICATE = ['ADVOCATE', 'TAX_CONSULTANT'];
-
 const identity = ref(null);
 const loading = ref(true);
 const saving = ref(false);
@@ -31,19 +27,19 @@ const editing = ref(false);
 
 const form = ref({ kind: 'ORGANISATION', idNumber: '', registeredName: '', certificate: null });
 
-const kindOptions = computed(() => KINDS.map((kind) => ({ value: kind, label: t(`filer.kinds.${kind}`) })));
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
-const needsCertificate = computed(() => NEEDS_CERTIFICATE.includes(form.value.kind));
+const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
 const status = computed(() => identity.value?.status ?? null);
 
-/** Each kind's number has its own shape; see the registration dialog. */
-const NUMBER_RULES = {
-  ORGANISATION: { maxlength: 11, inputmode: 'numeric', placeholder: '123-456-789', format: formatTin, valid: isValidTin, message: 'validation.tin' },
-  INDIVIDUAL: { maxlength: 23, inputmode: 'numeric', placeholder: '19900101-12345-00001-12', format: formatNida, valid: isValidNida, message: 'validation.nida' },
-  ADVOCATE: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
-  TAX_CONSULTANT: { maxlength: 30, inputmode: 'text', placeholder: '', format: (v) => v, valid: (v) => Boolean(String(v).trim()), message: 'validation.required' },
-};
-const numberRule = computed(() => NUMBER_RULES[form.value.kind]);
+/**
+ * The certificate the Board already read, if this filer has shown one. Sending
+ * different details keeps it, so it is named here and not asked for again.
+ */
+const certificateOnFile = computed(() =>
+  identity.value?.kind === form.value.kind ? (identity.value?.certificateName ?? null) : null,
+);
+
+const numberRule = computed(() => numberRuleFor(form.value.kind));
 const onNumberInput = (event) => {
   form.value.idNumber = numberRule.value.format(event.target.value);
 };
@@ -72,8 +68,15 @@ const load = async () => {
 load();
 
 const submit = async () => {
-  if (!numberRule.value.valid(form.value.idNumber)) {
-    toast.add({ severity: 'warn', summary: t('common.validation'), detail: t(numberRule.value.message), life: 4000 });
+  // The same question the Board asks, asked here first — counting the
+  // certificate already on file, which the server keeps.
+  const problem = identityProblem({
+    kind: form.value.kind,
+    idNumber: form.value.idNumber,
+    hasCertificate: Boolean(form.value.certificate || certificateOnFile.value),
+  });
+  if (problem) {
+    toast.add({ severity: 'warn', summary: t('common.validation'), detail: t(problem), life: 4000 });
     return;
   }
   saving.value = true;
@@ -126,15 +129,8 @@ const submit = async () => {
 
       <form v-if="showForm" class="ss-card" @submit.prevent="submit">
         <div class="field">
-          <label for="filer-kind">{{ t('filer.kind') }}</label>
-          <Select
-            v-model="form.kind"
-            input-id="filer-kind"
-            :options="kindOptions"
-            option-label="label"
-            option-value="value"
-            class="w-full"
-          />
+          <label>{{ t('filer.kind') }}</label>
+          <FilerKindPicker v-model="form.kind" />
         </div>
 
         <div class="field">
@@ -157,8 +153,12 @@ const submit = async () => {
 
         <div v-if="needsCertificate" class="field">
           <label>{{ t('filer.certificate') }}</label>
+          <p v-if="certificateOnFile" class="on-file">
+            <i class="pi pi-paperclip"></i>
+            {{ t('filer.certificateOnFile', { name: certificateOnFile }) }}
+          </p>
           <FilePicker v-model="form.certificate" accept="application/pdf,image/*" />
-          <small class="hint">{{ t('filer.certificateHint') }}</small>
+          <small class="hint">{{ certificateOnFile ? t('filer.certificateReplaceHint') : t('filer.certificateHint') }}</small>
         </div>
 
         <div class="actions">
@@ -193,6 +193,14 @@ const submit = async () => {
 }
 .status-note.rejected {
   color: #b42318;
+}
+.on-file {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  color: #047857;
 }
 .reason {
   margin: 0.35rem 0 0.7rem;

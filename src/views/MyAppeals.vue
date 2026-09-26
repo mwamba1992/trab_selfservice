@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import DataTable from 'primevue/datatable';
@@ -8,7 +8,6 @@ import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Dialog from 'primevue/dialog';
 import DocumentsDialog from '@/components/DocumentsDialog.vue';
 import ResubmitDialog from '@/components/ResubmitDialog.vue';
 import SubmissionsDialog from '@/components/SubmissionsDialog.vue';
@@ -17,7 +16,6 @@ import RepliesDialog from '@/components/RepliesDialog.vue';
 import { SelfServiceAppeals as AppealService } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
-import { apiErrorMessage } from '@/utils/format.js';
 import { filingState, returnedFilings } from '@/utils/filingStatus.js';
 
 const { t } = useI18n();
@@ -41,29 +39,12 @@ const {
   statsDefault: { total: 0, decided: 0, pending: 0 },
 });
 
-const viewVisible = ref(false);
-const viewData = ref(null);
-const viewParties = ref({ appellants: [], respondents: [] });
-const openingId = ref(null);
 const docsVisible = ref(false);
 const docsAppeal = ref(null);
 
-const openView = async (appeal) => {
-  openingId.value = appeal.id;
-  try {
-    const [details, parties] = await Promise.all([
-      AppealService.getById(appeal.id),
-      AppealService.getParties(appeal.id).catch(() => ({ appellants: [], respondents: [] })),
-    ]);
-    viewData.value = details;
-    viewParties.value = parties;
-    viewVisible.value = true;
-  } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('appeals.loadFailed')), life: 4000 });
-  } finally {
-    openingId.value = null;
-  }
-};
+// Everything on an appeal lives in its case file.
+const router = useRouter();
+const openCaseFile = (appeal) => router.push({ name: 'AppealCaseFile', params: { id: appeal.id } });
 
 const openDocuments = (appeal) => {
   docsAppeal.value = appeal;
@@ -179,7 +160,7 @@ const openCorrect = (appeal) => {
         >
         <Column :header="t('fields.appealNo')">
           <template #body="{ data }">
-            <span v-if="data.appealNo" class="font-semibold">{{ data.appealNo }}</span>
+            <a v-if="data.appealNo" href="#" class="font-semibold case-link" @click.prevent="openCaseFile(data)">{{ data.appealNo }}</a>
             <span v-else class="awaiting">{{ t('notices.awaitingPayment') }}</span>
           </template>
         </Column>
@@ -206,14 +187,13 @@ const openCorrect = (appeal) => {
           <template #body="{ data }">
             <div class="flex gap-1">
               <Button
-                v-tooltip.top="t('common.view')"
-                icon="pi pi-eye"
+                v-tooltip.top="t('caseFile.open')"
+                icon="pi pi-folder-open"
                 text
                 rounded
                 size="small"
-                :loading="openingId === data.id"
-                :aria-label="t('common.view')"
-                @click="openView(data)"
+                :aria-label="t('caseFile.open')"
+                @click="openCaseFile(data)"
               />
               <Button
                 v-tooltip.top="t('appeals.documents')"
@@ -274,80 +254,6 @@ const openCorrect = (appeal) => {
       </DataTable>
     </div>
 
-    <Dialog
-      v-model:visible="viewVisible"
-      :header="t('appeals.detailsTitle')"
-      modal
-      :style="{ width: '560px' }"
-      :breakpoints="{ '640px': '95vw' }"
-    >
-      <div v-if="viewData" class="view-grid">
-        <div class="view-row">
-          <span class="view-label">{{ t('fields.appealNo') }}</span
-          ><span class="view-value"
-            ><strong>{{ viewData.appealNo || t('notices.awaitingPayment') }}</strong></span
-          >
-        </div>
-        <div class="view-row">
-          <span class="view-label">{{ t('appeals.dateFiled') }}</span
-          ><span class="view-value">{{ viewData.dateOfFiling }}</span>
-        </div>
-        <div class="view-row">
-          <span class="view-label">{{ t('fields.appellant') }}</span
-          ><span class="view-value">{{ viewData.appellantName }}</span>
-        </div>
-        <div class="view-row">
-          <span class="view-label">{{ t('fields.taxType') }}</span
-          ><span class="view-value">{{ viewData.taxType?.name || t('common.dash') }}</span>
-        </div>
-        <div class="view-row">
-          <span class="view-label">{{ t('common.status') }}</span>
-          <span class="view-value"
-            ><Tag :value="statusLabel(viewData.statusTrend)" :severity="statusSeverity(viewData.statusTrend)"
-          /></span>
-        </div>
-        <div class="view-row">
-          <span class="view-label">{{ t('appeals.outcome') }}</span
-          ><span class="view-value">{{ viewData.outcomeOfDecision || t('common.dash') }}</span>
-        </div>
-
-        <div v-if="viewParties.appellants.length || viewParties.respondents.length" class="soft-panel">
-          <div v-if="viewParties.appellants.length" class="mb-3">
-            <p class="parties-title">{{ t('fields.appellants') }}</p>
-            <div v-for="a in viewParties.appellants" :key="a.id" class="party-row">
-              <span>{{ a.appellant?.firstName }} {{ a.appellant?.lastName || '' }}</span>
-              <Tag :value="statusLabel(a.role)" severity="info" />
-            </div>
-          </div>
-          <div v-if="viewParties.respondents.length">
-            <p class="parties-title">{{ t('fields.respondents') }}</p>
-            <div v-for="r in viewParties.respondents" :key="r.id" class="party-row">
-              <span>{{ r.respondent?.name }}</span>
-              <Tag v-if="r.respondent?.isDefault" :value="statusLabel('DEFAULT')" severity="success" />
-            </div>
-          </div>
-        </div>
-
-        <template v-if="viewData.decidedDate">
-          <div class="view-row">
-            <span class="view-label">{{ t('appeals.decisionDate') }}</span
-            ><span class="view-value">{{ viewData.decidedDate }}</span>
-          </div>
-          <div class="view-row">
-            <span class="view-label">{{ t('appeals.wonBy') }}</span>
-            <span class="view-value"
-              ><Tag :value="viewData.wonBy || t('common.dash')" :severity="/appellant/i.test(viewData.wonBy || '') ? 'success' : 'danger'"
-            /></span>
-          </div>
-        </template>
-        <div v-if="viewData.summaryOfDecree" class="soft-panel">
-          <strong class="text-label">{{ t('appeals.summary') }}:</strong>
-          <p class="mt-1 mb-0">{{ viewData.summaryOfDecree }}</p>
-        </div>
-      </div>
-      <template #footer><Button :label="t('common.close')" outlined @click="viewVisible = false" /></template>
-    </Dialog>
-
     <DocumentsDialog
       v-model:visible="docsVisible"
       :api="AppealService"
@@ -367,21 +273,12 @@ const openCorrect = (appeal) => {
 </template>
 
 <style scoped>
-.parties-title {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--trab-label);
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
+.case-link {
+  color: var(--trab-primary);
+  text-decoration: none;
 }
-.party-row {
-  font-size: 0.82rem;
-  padding: 0.3rem 0;
-  border-bottom: 1px solid var(--trab-line);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
+.case-link:hover {
+  text-decoration: underline;
 }
 .returned-banner {
   display: flex;

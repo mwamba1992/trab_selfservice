@@ -16,6 +16,11 @@ const routes = [
       { path: 'notices/new', name: 'FileNotice', component: () => import('@/views/FileNotice.vue') },
       { path: 'appeals', name: 'MyAppeals', component: () => import('@/views/MyAppeals.vue') },
       { path: 'appeals/file', name: 'FileAppeal', component: () => import('@/views/FileAppeal.vue') },
+      {
+        path: 'appeals/:id([0-9a-fA-F-]{36})',
+        name: 'AppealCaseFile',
+        component: () => import('@/views/AppealCaseFile.vue'),
+      },
       { path: 'applications', name: 'MyApplications', component: () => import('@/views/MyApplications.vue') },
       { path: 'applications/new', name: 'FileApplication', component: () => import('@/views/FileApplication.vue') },
       { path: 'bills', name: 'MyBills', component: () => import('@/views/MyBills.vue') },

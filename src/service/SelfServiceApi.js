@@ -114,6 +114,15 @@ export const SelfServiceAppeals = {
   async getParties(appealId) {
     return data(await api.get(`/self-service/appeals/${appealId}/parties`));
   },
+  /** Everything on the appeal in one record: documents, bills, hearings, decision and history. */
+  async getCaseFile(appealId) {
+    return data(await api.get(`/self-service/appeals/${appealId}/case-file`));
+  },
+  /** The whole case file bound as one PDF; resolves to a Blob. */
+  async downloadCaseFile(appealId) {
+    const res = await api.get(`/self-service/appeals/${appealId}/case-file/bundle`, { responseType: 'blob', timeout: 300000 });
+    return res.data;
+  },
   /** Corrects a returned statement of appeal and sends it back to the registry. */
   async resubmit(id, corrections) {
     return data(await api.post(`/self-service/appeals/${id}/resubmit`, corrections));

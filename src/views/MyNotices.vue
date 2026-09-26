@@ -163,6 +163,11 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
         <Column :header="t('common.sn')" class="w-14"
           ><template #body="{ index }">{{ first + index + 1 }}</template></Column
         >
+        <Column :header="t('fields.caseRef')">
+          <template #body="{ data }"
+            ><span class="case-ref">{{ data.caseRef || t('common.dash') }}</span></template
+          >
+        </Column>
         <Column :header="t('fields.noticeNo')">
           <template #body="{ data }">
             <span v-if="data.noticeNo" class="font-semibold">{{ data.noticeNo }}</span>
@@ -339,6 +344,11 @@ const paymentSeverity = (status) => (status === 'PAID' ? 'success' : 'warn');
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .returned-banner {
   display: flex;
   gap: 0.7rem;

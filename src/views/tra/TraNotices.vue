@@ -91,7 +91,13 @@ onMounted(load);
     <div class="ss-card">
       <form class="search-bar" role="search" @submit.prevent="runSearch">
         <label for="notice-search" class="sr-only">Search notices</label>
-        <InputText id="notice-search" v-model="search" type="search" placeholder="Search notice no. or appellant" class="search-input" />
+        <InputText
+          id="notice-search"
+          v-model="search"
+          type="search"
+          placeholder="Search case ref., notice no. or appellant"
+          class="search-input"
+        />
         <Button type="submit" label="Search" icon="pi pi-search" class="trab-btn" size="small" />
         <Button v-if="search" type="button" label="Clear" outlined size="small" @click="clearSearch" />
       </form>
@@ -116,6 +122,11 @@ onMounted(load);
         @page="onPage"
         @row-click="openRow"
       >
+        <Column header="Case Ref.">
+          <template #body="{ data }"
+            ><span class="case-ref">{{ data.caseRef || '-' }}</span></template
+          >
+        </Column>
         <Column header="Notice No.">
           <template #body="{ data }"
             ><strong>{{ data.noticeNo || 'No number yet' }}</strong></template
@@ -156,6 +167,11 @@ onMounted(load);
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .search-bar {
   display: flex;
   flex-wrap: wrap;

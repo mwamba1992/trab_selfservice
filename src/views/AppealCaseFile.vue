@@ -75,7 +75,7 @@ const onTabKey = (event, index) => {
   document.getElementById(`case-tab-${next.key}`)?.focus();
 };
 
-const caseRef = computed(() => appeal.value?.appealNo || appeal.value?.appellantName || '');
+const caseRef = computed(() => appeal.value?.appealNo || appeal.value?.caseRef || appeal.value?.appellantName || '');
 const statusSeverity = (s) => ({ NEW: 'info', HEARING_SCHEDULED: 'warn', CONCLUDED: 'secondary', DECIDED: 'success' })[s] || 'info';
 const partyName = (party) => (party === 'RESPONDENT' ? t('status.RESPONDENT') : t('status.APPELLANT'));
 
@@ -128,7 +128,7 @@ const closeDialog = (open) => {
     <div class="page-header detail-header">
       <div>
         <p class="eyebrow">{{ t('caseFile.eyebrow') }}</p>
-        <h2>{{ appeal?.appealNo || t('notices.awaitingPayment') }}</h2>
+        <h2>{{ appeal?.appealNo || appeal?.caseRef || t('notices.awaitingPayment') }}</h2>
         <p>{{ appeal?.appellantName }}</p>
       </div>
       <div class="flex gap-2 flex-wrap">
@@ -186,6 +186,8 @@ const closeDialog = (open) => {
             <Tag :value="t(filingState(appeal).key)" :severity="filingState(appeal).severity" />
           </div>
           <dl>
+            <dt>{{ t('fields.caseRef') }}</dt>
+            <dd class="case-ref">{{ appeal.caseRef || t('common.dash') }}</dd>
             <dt>{{ t('fields.appealNo') }}</dt>
             <dd>{{ appeal.appealNo || t('common.dash') }}</dd>
             <template v-if="file.notice">
@@ -528,6 +530,9 @@ const closeDialog = (open) => {
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 .detail-header {
   display: flex;
   align-items: flex-start;

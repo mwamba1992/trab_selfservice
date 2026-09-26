@@ -114,6 +114,11 @@ const paymentTag = (a) => ({ value: statusLabel(a.paymentStatus || 'UNPAID'), se
         <Column :header="t('common.sn')" class="w-14"
           ><template #body="{ index }">{{ first + index + 1 }}</template></Column
         >
+        <Column :header="t('fields.caseRef')">
+          <template #body="{ data }"
+            ><span class="case-ref">{{ data.caseRef || t('common.dash') }}</span></template
+          >
+        </Column>
         <Column :header="t('fields.applicationNo')">
           <template #body="{ data }">
             <span v-if="data.applicationNo" class="font-semibold">{{ data.applicationNo }}</span>
@@ -240,3 +245,11 @@ const paymentTag = (a) => ({ value: statusLabel(a.paymentStatus || 'UNPAID'), se
     />
   </div>
 </template>
+
+<style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+</style>

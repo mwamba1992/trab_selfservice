@@ -311,7 +311,13 @@ onMounted(async () => {
       <div class="filter-grid">
         <div class="field">
           <label for="f-search">Search</label>
-          <InputText id="f-search" v-model="searchDraft" type="search" placeholder="Appeal number or appellant name" class="w-full" />
+          <InputText
+            id="f-search"
+            v-model="searchDraft"
+            type="search"
+            placeholder="Case ref., appeal number or appellant name"
+            class="w-full"
+          />
         </div>
         <div class="field">
           <label for="f-reply">Reply status</label>
@@ -423,6 +429,11 @@ onMounted(async () => {
         <Column header="S/N" class="w-14">
           <template #body="{ index }">{{ (page - 1) * size + index + 1 }}</template>
         </Column>
+        <Column header="Case Ref.">
+          <template #body="{ data }"
+            ><span class="case-ref">{{ data.caseRef || '-' }}</span></template
+          >
+        </Column>
         <Column header="Appeal No.">
           <template #body="{ data }">
             <router-link :to="`/tra/appeals/${data.id}`" class="row-link">{{ data.appealNo || 'No number yet' }}</router-link>
@@ -461,6 +472,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

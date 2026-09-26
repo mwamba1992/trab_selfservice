@@ -157,14 +157,19 @@ const submit = async () => {
   }
   saving.value = true;
   try {
-    await SelfServiceNotices.create({
+    const filed = await SelfServiceNotices.create({
       ...form.value,
       additionalRespondent: form.value.additionalRespondent.trim() || undefined,
       description: form.value.description || undefined,
       regionId: form.value.regionId || undefined,
     });
     draft.clear();
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('fileNotice.filed'), life: 5000 });
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: filed?.caseRef ? t('fileNotice.filedWithRef', { ref: filed.caseRef }) : t('fileNotice.filed'),
+      life: 5000,
+    });
     router.push('/notices');
   } catch (err) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('fileNotice.failed')), life: 6000 });

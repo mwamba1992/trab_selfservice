@@ -89,7 +89,7 @@ const submit = async () => {
   }
   saving.value = true;
   try {
-    await SelfServiceApplications.create({
+    const filed = await SelfServiceApplications.create({
       appellantId: form.value.appellantId,
       applicationType: form.value.applicationType,
       appealId: form.value.appealId || undefined,
@@ -98,7 +98,12 @@ const submit = async () => {
       natureOfApplication: form.value.natureOfApplication.trim(),
     });
     draft.clear();
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('fileApplication.filed'), life: 5000 });
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: filed?.caseRef ? t('fileApplication.filedWithRef', { ref: filed.caseRef }) : t('fileApplication.filed'),
+      life: 5000,
+    });
     router.push('/applications');
   } catch (err) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: apiErrorMessage(err, t('fileApplication.failed')), life: 6000 });

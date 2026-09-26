@@ -17,6 +17,10 @@ const emit = defineEmits(['retry-parties']);
     <table class="view-table">
       <tbody>
         <tr>
+          <td class="view-label">Case Ref.</td>
+          <td class="case-ref">{{ appeal.caseRef || '-' }}</td>
+        </tr>
+        <tr>
           <td class="view-label">Appeal No.</td>
           <td>{{ appeal.appealNo || '-' }}</td>
         </tr>
@@ -67,6 +71,11 @@ const emit = defineEmits(['retry-parties']);
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .side-head {
   font-size: 0.75rem;
   font-weight: 700;

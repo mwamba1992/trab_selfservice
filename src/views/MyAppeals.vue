@@ -158,6 +158,11 @@ const openCorrect = (appeal) => {
         <Column :header="t('common.sn')" class="w-14"
           ><template #body="{ index }">{{ first + index + 1 }}</template></Column
         >
+        <Column :header="t('fields.caseRef')">
+          <template #body="{ data }"
+            ><a href="#" class="case-ref case-link" @click.prevent="openCaseFile(data)">{{ data.caseRef || t('common.dash') }}</a></template
+          >
+        </Column>
         <Column :header="t('fields.appealNo')">
           <template #body="{ data }">
             <a v-if="data.appealNo" href="#" class="font-semibold case-link" @click.prevent="openCaseFile(data)">{{ data.appealNo }}</a>
@@ -273,6 +278,11 @@ const openCorrect = (appeal) => {
 </template>
 
 <style scoped>
+.case-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .case-link {
   color: var(--trab-primary);
   text-decoration: none;

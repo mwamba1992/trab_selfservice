@@ -154,7 +154,12 @@ const submit = async () => {
       witnesses: witnesses.value,
     });
     draft.clear();
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('fileAppeal.filed'), life: 5000 });
+    toast.add({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: appeal?.caseRef ? t('fileAppeal.filedWithRef', { ref: appeal.caseRef }) : t('fileAppeal.filed'),
+      life: 5000,
+    });
     // Straight to the annexure window: they can attach until the registry checks it.
     router.push({ path: '/appeals', query: appeal?.id ? { attach: appeal.id } : {} });
   } catch (err) {

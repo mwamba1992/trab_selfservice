@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { identityProblem, needsCertificate, numberRuleFor } from './filerKinds.js';
+import { identityProblem, numberRuleFor, offersCertificate } from './filerKinds.js';
 
 describe('filer kinds', () => {
-  it('asks only those who act for others for a certificate', () => {
-    expect(needsCertificate('ADVOCATE')).toBe(true);
-    expect(needsCertificate('TAX_CONSULTANT')).toBe(true);
-    expect(needsCertificate('ORGANISATION')).toBe(false);
-    expect(needsCertificate('INDIVIDUAL')).toBe(false);
+  it('offers a certificate only to those who act for others', () => {
+    expect(offersCertificate('ADVOCATE')).toBe(true);
+    expect(offersCertificate('TAX_CONSULTANT')).toBe(true);
+    expect(offersCertificate('ORGANISATION')).toBe(false);
+    expect(offersCertificate('INDIVIDUAL')).toBe(false);
   });
 
   it('writes a TIN in the groups it is read in', () => {
@@ -20,18 +20,10 @@ describe('filer kinds', () => {
     expect(identityProblem({ kind: 'INDIVIDUAL', idNumber: '1990' })).toBe('validation.nida');
   });
 
-  it('refuses an advocate who shows no certificate', () => {
-    expect(identityProblem({ kind: 'ADVOCATE', idNumber: 'ROLL-4471' })).toBe(
-      'filer.certificateRequired',
-    );
-  });
-
-  // The Board keeps the certificate it already read, so a filer correcting
-  // their roll number is not asked for it a second time.
-  it('accepts an advocate whose certificate is already on file', () => {
-    expect(
-      identityProblem({ kind: 'ADVOCATE', idNumber: 'ROLL-4471', hasCertificate: true }),
-    ).toBeNull();
+  // The roll number is checked against the Judiciary's roll, not a certificate.
+  it('takes an advocate on their roll number alone', () => {
+    expect(identityProblem({ kind: 'ADVOCATE', idNumber: 'ROLL-4471' })).toBeNull();
+    expect(identityProblem({ kind: 'ADVOCATE', idNumber: '  ' })).toBe('validation.required');
   });
 
   it('will not take a kind it does not know', () => {

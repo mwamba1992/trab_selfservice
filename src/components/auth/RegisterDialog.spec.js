@@ -48,7 +48,10 @@ const open = () =>
   });
 
 const pickKind = async (wrapper, label) => {
-  await wrapper.findAll('.kind-tile').find((tile) => tile.text() === label).trigger('click');
+  await wrapper
+    .findAll('.kind-tile')
+    .find((tile) => tile.text() === label)
+    .trigger('click');
 };
 
 /** Step one: what you are, and the number that proves it. */
@@ -75,23 +78,20 @@ describe('RegisterDialog', () => {
   });
 
   it('opens on the four kinds of filer the Board accepts', () => {
-    const options = open().findAll('.kind-tile').map((o) => o.text());
-    expect(options).toEqual([
-      'A company or organisation',
-      'An individual taxpayer',
-      'An advocate',
-      'A tax consultant',
-    ]);
+    const options = open()
+      .findAll('.kind-tile')
+      .map((o) => o.text());
+    expect(options).toEqual(['A company or organisation', 'An individual taxpayer', 'An advocate', 'A tax consultant']);
   });
 
-  it('asks a company for its TIN, and an advocate for a roll number and certificate', async () => {
+  it('asks a company for its TIN, and an advocate for a roll number', async () => {
     const wrapper = open();
     expect(wrapper.text()).toContain('TIN');
     expect(wrapper.find('.file-picker').exists()).toBe(false);
 
     await pickKind(wrapper, 'An advocate');
     expect(wrapper.text()).toContain('Roll number');
-    // Somebody who files for other people shows the Board their standing.
+    // An advocate may attach a practising certificate, but is not made to.
     expect(wrapper.find('.file-picker').exists()).toBe(true);
   });
 
@@ -109,7 +109,10 @@ describe('RegisterDialog', () => {
   it('lets someone go back and change who they said they are', async () => {
     const wrapper = open();
     await identity(wrapper);
-    await wrapper.findAll('button').find((b) => b.text() === 'Back').trigger('click');
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Back')
+      .trigger('click');
     expect(wrapper.findAll('.kind-tile')).toHaveLength(4);
   });
 
@@ -150,13 +153,13 @@ describe('RegisterDialog', () => {
     expect(wrapper.find('#reg-email').exists()).toBe(false);
   });
 
-  it('will not take an advocate past step one without the certificate', async () => {
+  // The roll number is checked against the Judiciary's roll, not a certificate.
+  it('takes an advocate past step one on their roll number alone', async () => {
     const wrapper = open();
     await pickKind(wrapper, 'An advocate');
     await identity(wrapper, 'ADV-9002');
 
-    expect(wrapper.find('#reg-email').exists()).toBe(false);
-    expect(wrapper.find('.err').text()).toBe('Attach the certificate that proves this number');
+    expect(wrapper.find('#reg-email').exists()).toBe(true);
   });
 
   it('holds the password to the length the API requires', async () => {

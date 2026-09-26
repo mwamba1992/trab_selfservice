@@ -10,12 +10,13 @@ import FilePicker from '@/components/FilePicker.vue';
 import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import { SelfServiceFiler } from '@/service/SelfServiceApi.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { hasRegisteredName, identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
+import { hasRegisteredName, identityProblem, offersCertificate, numberRuleFor } from '@/utils/filerKinds.js';
 
 /**
- * Who this account is. The Board accepts filings from people it can identify
- * and holds them to what they file, so this is what decides whether anything
- * filed here reaches the register.
+ * Who this account is. Registration is self-service: the filer says what they
+ * are and gives the number that proves it, and can file straight away. The
+ * number is kept to be checked against the official register (NIDA, the roll
+ * of advocates) once that link is in place.
  */
 const { t } = useI18n();
 const toast = useToast();
@@ -28,13 +29,13 @@ const editing = ref(false);
 const form = ref({ kind: 'ORGANISATION', idNumber: '', registeredName: '', certificate: null });
 
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
-const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
+const showsCertificate = computed(() => offersCertificate(form.value.kind));
 const showsRegisteredName = computed(() => hasRegisteredName(form.value.kind));
 const status = computed(() => identity.value?.status ?? null);
 
 /**
- * The certificate the Board already read, if this filer has shown one. Sending
- * different details keeps it, so it is named here and not asked for again.
+ * The certificate on file, if this filer attached one. Correcting the details
+ * keeps it, so it is named here and not asked for again.
  */
 const certificateOnFile = computed(() =>
   identity.value?.kind === form.value.kind ? (identity.value?.certificateName ?? null) : null,
@@ -74,7 +75,6 @@ const submit = async () => {
   const problem = identityProblem({
     kind: form.value.kind,
     idNumber: form.value.idNumber,
-    hasCertificate: Boolean(form.value.certificate || certificateOnFile.value),
   });
   if (problem) {
     toast.add({ severity: 'warn', summary: t('common.validation'), detail: t(problem), life: 4000 });
@@ -114,7 +114,7 @@ const submit = async () => {
         <div class="status-row">
           <Tag
             :value="t(`filer.kinds.${identity.kind}`)"
-            :severity="status === 'VERIFIED' ? 'success' : status === 'REJECTED' ? 'danger' : 'warn'"
+            :severity="status === 'VERIFIED' ? 'success' : status === 'REJECTED' ? 'danger' : 'info'"
           />
           <span class="id-number">{{ t(`filer.idLabel.${identity.kind}`) }}: <strong>{{ identity.idNumber }}</strong></span>
         </div>
@@ -155,7 +155,7 @@ const submit = async () => {
           <InputText id="filer-name" v-model="form.registeredName" class="w-full" />
         </div>
 
-        <div v-if="needsCertificate" class="field">
+        <div v-if="showsCertificate" class="field">
           <label>{{ t('filer.certificate') }}</label>
           <p v-if="certificateOnFile" class="on-file">
             <i class="pi pi-paperclip"></i>
@@ -192,7 +192,7 @@ const submit = async () => {
 .status-note.verified {
   color: #047857;
 }
-.status-note.pending {
+.status-note.declared {
   color: #b45309;
 }
 .status-note.rejected {

@@ -10,7 +10,7 @@ import FilePicker from '@/components/FilePicker.vue';
 import FilerKindPicker from '@/components/filer/FilerKindPicker.vue';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage } from '@/utils/format.js';
-import { hasRegisteredName, identityProblem, needsCertificate as kindNeedsCertificate, numberRuleFor } from '@/utils/filerKinds.js';
+import { hasRegisteredName, identityProblem, offersCertificate, numberRuleFor } from '@/utils/filerKinds.js';
 import { isValidEmail, isValidOtp, isValidPhone, isValidTin, normalizePhone } from '@/utils/validators.js';
 
 /**
@@ -47,7 +47,7 @@ const form = ref({
 });
 
 const idLabel = computed(() => t(`filer.idLabel.${form.value.kind}`));
-const needsCertificate = computed(() => kindNeedsCertificate(form.value.kind));
+const showsCertificate = computed(() => offersCertificate(form.value.kind));
 const isCompany = computed(() => form.value.kind === 'ORGANISATION');
 const showsRegisteredName = computed(() => hasRegisteredName(form.value.kind));
 
@@ -66,7 +66,6 @@ const toDetails = () => {
   const problem = identityProblem({
     kind: form.value.kind,
     idNumber: form.value.idNumber,
-    hasCertificate: Boolean(form.value.certificate),
   });
   error.value = problem ? t(problem) : '';
   if (!problem) step.value = 'details';
@@ -207,7 +206,7 @@ const verify = async () => {
         <small v-if="tinName" class="found">{{ tinName }}</small>
       </div>
 
-      <div v-if="needsCertificate" class="auth-field">
+      <div v-if="showsCertificate" class="auth-field">
         <label>{{ t('filer.certificate') }}</label>
         <FilePicker v-model="form.certificate" accept="application/pdf,image/*" />
         <small>{{ t('filer.certificateHint') }}</small>

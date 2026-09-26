@@ -3,16 +3,20 @@ import { formatNida, formatTin, isValidNida, isValidTin } from './validators.js'
 /**
  * What a filer may be, and the number each kind gives to prove it.
  *
- * Asked twice — once when an account is made, once when a filer sends the
- * registry different details — so the rules live here rather than in either
- * screen, and the two cannot drift apart.
+ * Asked twice — once when an account is made, once when a filer corrects
+ * their details — so the rules live here rather than in either screen, and
+ * the two cannot drift apart.
  */
 export const FILER_KINDS = ['ORGANISATION', 'INDIVIDUAL', 'ADVOCATE', 'TAX_CONSULTANT'];
 
-/** The two who act for other people must show the Board their standing. */
+/**
+ * The two who act for other people may attach a practising certificate. It is
+ * not asked for: their number is to be checked against the official register
+ * (the Judiciary's roll of advocates), not read by the registry.
+ */
 const ACTS_FOR_OTHERS = ['ADVOCATE', 'TAX_CONSULTANT'];
 
-export const needsCertificate = (kind) => ACTS_FOR_OTHERS.includes(kind);
+export const offersCertificate = (kind) => ACTS_FOR_OTHERS.includes(kind);
 
 /**
  * An individual is the name they already gave, so asking again for the name
@@ -75,12 +79,10 @@ export const numberRuleFor = (kind) => NUMBER_RULES[kind] ?? NUMBER_RULES.ORGANI
 /**
  * Why this identity cannot be sent yet, or null — the same question the
  * server asks in filer-identity.util.ts, asked here so the filer hears it
- * before the form is sent. `hasCertificate` is what the record will hold: one
- * attached now, or one the Board already read.
+ * before the form is sent.
  */
-export const identityProblem = ({ kind, idNumber, hasCertificate }) => {
+export const identityProblem = ({ kind, idNumber }) => {
   if (!FILER_KINDS.includes(kind)) return 'filer.kindRequired';
   if (!numberRuleFor(kind).valid(idNumber)) return numberRuleFor(kind).message;
-  if (needsCertificate(kind) && !hasCertificate) return 'filer.certificateRequired';
   return null;
 };

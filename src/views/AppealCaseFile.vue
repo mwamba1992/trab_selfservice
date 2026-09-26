@@ -129,8 +129,11 @@ const closeDialog = (open) => {
     <div class="page-header detail-header">
       <div>
         <p class="eyebrow">{{ t('caseFile.eyebrow') }}</p>
-        <h2>{{ appeal?.appealNo || appeal?.caseRef || t('notices.awaitingPayment') }}</h2>
-        <p>{{ appeal?.appellantName }}</p>
+        <h2>{{ appeal?.appealNo || t('notices.awaitingPayment') }}</h2>
+        <p>
+          {{ appeal?.appellantName
+          }}<template v-if="appeal?.caseRef"> · {{ t('fields.caseRef') }} <span class="case-ref">{{ appeal.caseRef }}</span></template>
+        </p>
       </div>
       <div class="flex gap-2 flex-wrap">
         <Button v-if="file" :label="t('caseFile.download')" icon="pi pi-file-pdf" class="trab-btn" size="small" @click="openBundle" />

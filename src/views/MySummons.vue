@@ -7,6 +7,7 @@ import InputText from 'primevue/inputtext';
 import { SelfServiceSummons } from '@/service/SelfServiceApi.js';
 import { useLabels } from '@/composables/useLabels.js';
 import { usePagedList } from '@/composables/usePagedList.js';
+import JoinHearing from '@/components/JoinHearing.vue';
 
 const { t } = useI18n();
 const { statusLabel } = useLabels();
@@ -79,6 +80,19 @@ const severity = (s) => (s === 'SERVED' ? 'success' : s === 'CONCLUDED' ? 'secon
         <Column :header="t('summons.venue')"
           ><template #body="{ data }">{{ data.summons?.venue || t('common.dash') }}</template></Column
         >
+        <Column :header="t('summons.howHeld')">
+          <template #body="{ data }">
+            <JoinHearing
+              v-if="data.summons"
+              :mode="data.summons.hearingMode"
+              :link="data.summons.meetingLink"
+              :details="data.summons.meetingDetails"
+            />
+            <span v-if="!data.summons || data.summons.hearingMode === 'IN_PERSON' || !data.summons.hearingMode">{{
+              t('common.dash')
+            }}</span>
+          </template>
+        </Column>
         <Column :header="t('summons.panel')"
           ><template #body="{ data }">{{ data.summons?.judge?.name || t('common.dash') }}</template></Column
         >

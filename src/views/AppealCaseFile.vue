@@ -16,6 +16,7 @@ import { apiErrorMessage, formatDate, formatDateTime, formatMoney } from '@/util
 import { filingState } from '@/utils/filingStatus.js';
 import { openPreview } from '@/utils/preview.js';
 import { billTotals, fileSize, groupDocuments, timelineIcon } from '@/utils/caseFile.js';
+import JoinHearing from '@/components/JoinHearing.vue';
 
 /**
  * The digital case file: everything on one appeal — particulars, parties,
@@ -353,6 +354,7 @@ const closeDialog = (open) => {
                 </div>
                 <div class="min-w-0">
                   <div>{{ h.venue || t('common.dash') }}</div>
+                  <JoinHearing :mode="h.hearingMode" :link="h.meetingLink" :details="h.meetingDetails" class="mt-1" />
                   <div class="muted">
                     <template v-if="h.chairperson">{{ h.chairperson }} — {{ t('caseFile.chairperson') }}</template>
                     <template v-for="m in h.members" :key="m"> · {{ m }}</template>

@@ -14,6 +14,7 @@ import { TraApi } from '@/service/TraApi.js';
 import AuthService from '@/service/AuthService.js';
 import { apiErrorMessage, formatDate, humanize } from '@/utils/format.js';
 import { ATTENDANCE_OPTIONS, hearingResponseBadge, hearingResponseProblem, isInteractiveTarget } from '@/utils/tra/lists.js';
+import JoinHearing from '@/components/JoinHearing.vue';
 
 // The TRA desk is English by policy, so this view carries no translation keys.
 const router = useRouter();
@@ -152,6 +153,14 @@ onMounted(load);
               {{ formatDate(data.summons?.startDate) }}<span v-if="data.summons?.time" class="sub-inline"> · {{ data.summons.time }}</span>
             </div>
             <div class="sub">{{ data.summons?.venue || '-' }}</div>
+            <JoinHearing
+              v-if="data.summons"
+              :mode="data.summons.hearingMode"
+              :link="data.summons.meetingLink"
+              :details="data.summons.meetingDetails"
+              english
+              class="mt-1"
+            />
           </template>
         </Column>
         <Column header="Panel"

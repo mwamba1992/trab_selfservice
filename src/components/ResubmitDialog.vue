@@ -6,6 +6,7 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
+import DocumentEditor from '@/components/DocumentEditor.vue';
 import { apiErrorMessage } from '@/utils/format.js';
 
 const props = defineProps({
@@ -22,6 +23,7 @@ const { t } = useI18n();
 const toast = useToast();
 const form = ref({});
 const saving = ref(false);
+const original = ref({});
 
 const fields = computed(() =>
   props.kind === 'appeal'
@@ -29,6 +31,7 @@ const fields = computed(() =>
         { key: 'natureOfAppeal', label: t('fileAppeal.natureOfAppeal'), type: 'text' },
         { key: 'assessmentNo', label: t('fileAppeal.assessmentNo'), type: 'input' },
         { key: 'taxedOffice', label: t('fileAppeal.taxedOffice'), type: 'input' },
+        { key: 'statementBody', label: t('fileAppeal.statementTitle'), type: 'document' },
       ]
     : [
         { key: 'dateOfTaxationDecision', label: t('notices.decisionDate'), type: 'date' },
@@ -42,6 +45,7 @@ watch(
   ([open]) => {
     if (!open || !props.record) return;
     form.value = Object.fromEntries(fields.value.map((f) => [f.key, props.record[f.key] ?? '']));
+    original.value = { ...form.value };
   },
 );
 
@@ -49,7 +53,12 @@ const submit = async () => {
   saving.value = true;
   try {
     // Only changed values go up; blanks are left as they were.
-    const corrections = Object.fromEntries(Object.entries(form.value).filter(([, v]) => v !== '' && v !== null));
+    // The statement goes up only when it was changed: sending it makes its document again.
+    const corrections = Object.fromEntries(
+      Object.entries(form.value).filter(
+        ([key, v]) => v !== '' && v !== null && (key !== 'statementBody' || v !== original.value.statementBody),
+      ),
+    );
     await props.api.resubmit(props.record.id, corrections);
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('filingStatus.resubmitted'), life: 5000 });
     emit('resubmitted');
@@ -67,7 +76,7 @@ const submit = async () => {
     :visible="visible"
     :header="t('filingStatus.correctTitle')"
     modal
-    :style="{ width: '560px' }"
+    :style="{ width: kind === 'appeal' ? '820px' : '560px' }"
     :breakpoints="{ '640px': '95vw' }"
     @update:visible="emit('update:visible', $event)"
   >
@@ -79,8 +88,9 @@ const submit = async () => {
       <p v-if="kind === 'appeal'" class="hint">{{ t('filingStatus.annexureHint') }}</p>
 
       <div v-for="f in fields" :key="f.key" class="field">
-        <label :for="`fix-${f.key}`">{{ f.label }}</label>
-        <Textarea v-if="f.type === 'text'" :id="`fix-${f.key}`" v-model="form[f.key]" rows="3" auto-resize class="w-full" />
+        <label :for="f.type === 'document' ? undefined : `fix-${f.key}`">{{ f.label }}</label>
+        <DocumentEditor v-if="f.type === 'document'" v-model="form[f.key]" :rows="10" :aria-label="f.label" />
+        <Textarea v-else-if="f.type === 'text'" :id="`fix-${f.key}`" v-model="form[f.key]" rows="3" auto-resize class="w-full" />
         <InputText v-else :id="`fix-${f.key}`" v-model="form[f.key]" :type="f.type === 'date' ? 'date' : 'text'" class="w-full" />
       </div>
     </div>

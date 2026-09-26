@@ -14,6 +14,8 @@ import Select from 'primevue/select';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import DraftBanner from '@/components/DraftBanner.vue';
+import DocumentEditor from '@/components/DocumentEditor.vue';
+import { statementSkeleton, statementWritten } from '@/utils/statementTemplate.js';
 import { SelfServiceAppeals, SelfServiceAppellants } from '@/service/SelfServiceApi.js';
 import { TaxTypeService, CurrencyService } from '@/service/SettingsService.js';
 import api from '@/service/Api.js';
@@ -46,8 +48,12 @@ const emptyForm = () => ({
   bankNo: '',
   billEntryNo: '',
   taxedOffice: '',
+  // The statement starts from its layout, in the filer's language.
+  statementBody: statementSkeleton(locale.value),
 });
 const form = ref(emptyForm());
+const hasStatement = computed(() => statementWritten(form.value.statementBody, locale.value));
+const resetStatement = () => (form.value.statementBody = statementSkeleton(locale.value));
 const appellantList = ref([]);
 const additionalRespondents = ref([]);
 const amounts = ref([]);
@@ -55,6 +61,8 @@ const witnesses = ref([]);
 
 // One draft per notice so a draft for one notice never leaks into another
 const draft = useDraft(`appeal:${noticeNo || 'none'}`, { form, appellantList, additionalRespondents, amounts, witnesses });
+// A draft kept before statements were written here has none: start it from the layout.
+if (form.value.statementBody === undefined) form.value.statementBody = statementSkeleton(locale.value);
 const discardDraft = () => {
   draft.clear();
   form.value = emptyForm();
@@ -152,6 +160,8 @@ const submit = async () => {
       respondentIds: additionalRespondents.value.map((r) => r.id),
       amounts: amounts.value,
       witnesses: witnesses.value,
+      // An untouched layout is not a statement: it is left out.
+      statementBody: hasStatement.value ? form.value.statementBody : undefined,
     });
     draft.clear();
     toast.add({
@@ -187,7 +197,8 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
           <Step value="1">{{ t('fileAppeal.stepParties') }}</Step>
           <Step value="2">{{ t('fileAppeal.stepDispute') }}</Step>
           <Step value="3">{{ t('fileAppeal.stepAmounts') }}</Step>
-          <Step value="4">{{ t('fileAppeal.stepReview') }}</Step>
+          <Step value="4">{{ t('fileAppeal.stepStatement') }}</Step>
+          <Step value="5">{{ t('fileAppeal.stepReview') }}</Step>
         </StepList>
         <StepPanels>
           <StepPanel v-slot="{ activateCallback }" value="1">
@@ -410,17 +421,38 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
             </div>
             <div class="flex justify-between pt-2">
               <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('2')" />
+              <Button :label="t('common.next')" icon="pi pi-arrow-right" icon-pos="right" class="trab-btn" @click="activateCallback('4')" />
+            </div>
+          </StepPanel>
+
+          <StepPanel v-slot="{ activateCallback }" value="4">
+            <div class="py-4">
+              <h3 class="font-semibold mb-1 text-heading">{{ t('fileAppeal.statementTitle') }}</h3>
+              <p class="step-help">{{ t('fileAppeal.statementHelp') }}</p>
+              <DocumentEditor
+                v-model="form.statementBody"
+                :rows="16"
+                :aria-label="t('fileAppeal.statementTitle')"
+                :placeholder="t('fileAppeal.statementPlaceholder')"
+              />
+              <div class="flex justify-between items-center mt-2 flex-wrap gap-2">
+                <small class="step-help m-0">{{ t('fileAppeal.statementDraftNote') }}</small>
+                <Button :label="t('fileAppeal.statementReset')" icon="pi pi-replay" text size="small" @click="resetStatement" />
+              </div>
+            </div>
+            <div class="flex justify-between pt-2">
+              <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('3')" />
               <Button
                 :label="t('common.review')"
                 icon="pi pi-arrow-right"
                 icon-pos="right"
                 class="trab-btn"
-                @click="activateCallback('4')"
+                @click="activateCallback('5')"
               />
             </div>
           </StepPanel>
 
-          <StepPanel v-slot="{ activateCallback }" value="4">
+          <StepPanel v-slot="{ activateCallback }" value="5">
             <div class="py-4">
               <h3 class="font-semibold mb-3 text-heading">{{ t('fileAppeal.reviewTitle') }}</h3>
               <div class="view-grid">
@@ -455,9 +487,18 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
                   ><span class="view-value">{{ witnesses.map((w) => w.name).join(', ') }}</span>
                 </div>
               </div>
+              <h4 class="review-sub">{{ t('fileAppeal.statementTitle') }}</h4>
+              <DocumentEditor
+                v-if="hasStatement"
+                :model-value="form.statementBody"
+                :rows="6"
+                disabled
+                :aria-label="t('fileAppeal.statementTitle')"
+              />
+              <p v-else class="statement-missing"><i class="pi pi-info-circle"></i> {{ t('fileAppeal.statementNotWritten') }}</p>
             </div>
             <div class="flex justify-between pt-2">
-              <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('3')" />
+              <Button :label="t('common.back')" icon="pi pi-arrow-left" text @click="activateCallback('4')" />
               <Button :label="t('fileAppeal.submitStatement')" icon="pi pi-check" class="trab-btn" :loading="saving" @click="submit" />
             </div>
           </StepPanel>
@@ -468,6 +509,30 @@ const taxTypeName = computed(() => taxTypes.value.find((tt) => tt.id === form.va
 </template>
 
 <style scoped>
+.step-help {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0 0 0.75rem;
+}
+.review-sub {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--trab-label);
+  margin: 1.25rem 0 0.5rem;
+}
+.statement-missing {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin: 0;
+}
 .section-label {
   display: block;
   font-size: 0.85rem;

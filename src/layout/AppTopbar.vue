@@ -54,8 +54,8 @@ const userName = computed(() => {
 const unread = computed(() => profileStore.state.unreadCount);
 const unreadLabel = computed(() => (unread.value > 99 ? '99+' : String(unread.value)));
 
-const logout = () => {
-  AuthService.logout();
+const logout = async () => {
+  await AuthService.logout();
   router.push('/welcome');
 };
 

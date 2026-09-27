@@ -63,8 +63,16 @@ export default {
     return res.data;
   },
 
-  /** Explicit sign-out also discards unfinished drafts on this device. */
-  logout() {
+  /**
+   * Ends the session on the server too, so a copied token stops working.
+   * Explicit sign-out also discards unfinished drafts on this device.
+   */
+  async logout() {
+    try {
+      if (session.isActive()) await api.post('/auth/logout');
+    } catch {
+      // Signing out on this device must not depend on the server answering.
+    }
     clearDrafts();
     session.clear();
     profileStore.reset();

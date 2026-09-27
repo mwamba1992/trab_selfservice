@@ -83,6 +83,8 @@ const routes = [
     ],
   },
   { path: '/welcome', name: 'Landing', component: () => import('@/views/pages/auth/Landing.vue') },
+  // Public: anyone holding a document of the Board checks it here, signed in or not.
+  { path: '/verify/:code?', name: 'Verify', component: () => import('@/views/pages/VerifyDocument.vue') },
   { path: '/login', redirect: '/welcome' },
   { path: '/register', redirect: '/welcome' },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/pages/auth/NotFound.vue') },

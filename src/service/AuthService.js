@@ -63,16 +63,6 @@ export default {
     return res.data;
   },
 
-  async registerCompany(payload) {
-    return data(await api.post('/auth/company/register', payload));
-  },
-
-  async verifyCompany(payload) {
-    const result = data(await api.post('/auth/company/verify', payload));
-    session.start(result);
-    return result;
-  },
-
   /** Explicit sign-out also discards unfinished drafts on this device. */
   logout() {
     clearDrafts();
